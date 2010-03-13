@@ -9,15 +9,6 @@ BEGIN {
     require MooseX::StrictConstructor;
     MooseX::StrictConstructor->import;
 }
-use Module::Pluggable (
-    search_path => [ map { "Hailo::$_" } qw(Storage Tokenizer UI) ],
-    except      => [
-        # If an old version of Hailo is already istalled these modules
-        # may be lying around. Ignore them manually; and make sure to
-        # update this list if we move things around again.
-        map( { qq[Hailo::Storage::$_] } qw(SQL SQLite Pg mysql)),
-    ],
-);
 use List::Util qw(first);
 use namespace::clean -except => [ qw(meta plugins) ];
 
@@ -155,6 +146,15 @@ sub _build__ui {
     return $obj;
 }
 
+sub plugins { qw{
+    Hailo::Storage::DBD::Pg
+    Hailo::Storage::DBD::SQLite
+    Hailo::Storage::DBD::mysql
+    Hailo::Tokenizer::Chars
+    Hailo::Tokenizer::Words
+    Hailo::UI::ReadLine
+} }
+
 sub _new_class {
     my ($self, $type, $class, $args) = @_;
 
@@ -238,7 +238,7 @@ sub learn {
             die "Cannot learn from undef input";
         }
         when (not ref) {
-            $inputs = [$input];            
+            $inputs = [$input];
         }
         # With an Array
         when (ref eq 'ARRAY') {

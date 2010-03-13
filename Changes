@@ -2,6 +2,9 @@ Revision history for Hailo
 
 {{$NEXT}}
 
+    - Stop using Module::Pluggable and just hardcode the list of
+      plugins in Hailo.pm
+
 0.26 2010-03-13 08:04:32
 
     - Split the X::Getopt parts of Hailo into Hailo::Command. This way
