@@ -221,9 +221,15 @@ sub _engage {
         );
         $self->order($res->text);
 
-        $self->sth->{token_id}->execute(0, '');
-        my $id = $self->sth->{token_id}->fetchrow_array;
-        $self->_boundary_token_id($id);
+        my $token_id = $schema->resultset('Token')->find(
+            {
+                spacing => 0,
+                text    => '',
+            },
+            { columns => [ 'id' ] },
+        );
+
+        $self->_boundary_token_id($token_id->id);
     }
     else {
         $self->_create_db();
