@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+use autodie qw(:all);
+use strict;
+use warnings;
+
+my $db = q[/tmp/hailo.sqlite];
+system "rm $db" if -f $db;
+system "$^X -Ilib bin/hailo --brain $db --train t/lib/Hailo/Test/starcraft.trn";
+
+use DBIx::Class::Schema::Loader qw/ make_schema_at /;
+make_schema_at(
+    'Hailo::Storage::Schema',
+    {
+        debug => 1,
+        generate_pod => 1,
+        really_erase_my_files => 1,
+        dump_directory => './lib',
+    },
+    [ qq[dbi:SQLite:dbname=$db] ],
+);
