@@ -162,7 +162,7 @@ sub _sth_sections_static {
     $sections{$_} = undef for @plain_sections;
 
     for my $np (qw(next_token prev_token)) {
-        for my $ciag (qw(count inc add get)) {
+        for my $ciag (qw(count inc add)) {
             $sections{$np . '_' . $ciag} = {
                 section => "(next_token|prev_token)_$ciag",
                 options => { table => $np },
@@ -600,10 +600,25 @@ sub _random_expr {
 # return a new next/previous token
 sub _pos_token {
     my ($self, $pos, $expr_id, $key_tokens) = @_;
+    my $schema = $self->schema;
     my $dbh = $self->dbh;
 
-    $self->sth->{"${pos}_token_get"}->execute($expr_id);
-    my $pos_tokens = $self->sth->{"${pos}_token_get"}->fetchall_hashref('token_id');
+    # SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
+    my @rs = $schema->resultset(ucfirst($pos).'Token')->search(
+        { expr_id => $expr_id },
+        { columns => [ qw/ token_id count / ] },
+    )->all();
+
+    # XXX: Can I make DBIx::Class do what fetchall_hashref('token_id')
+    # did automatically? DBIx::Class::ResultClass::HashRefInflator
+    # only does it on a per-row basis.
+    my $pos_tokens = {};
+    for my $row (@rs) {
+        $pos_tokens->{ $row->token_id } = {
+            token_id => $row->token_id,
+            count    => $row->count,
+        };
+    }
 
     if (defined $key_tokens) {
         for my $i (0 .. $#{ $key_tokens }) {
@@ -758,8 +773,6 @@ __[ static_query_(next_token|prev_token)_inc ]__
 UPDATE [% table %] SET count = count + 1 WHERE expr_id = ? AND token_id = ?
 __[ static_query_(next_token|prev_token)_add ]__
 INSERT INTO [% table %] (expr_id, token_id, count) VALUES (?, ?, 1);
-__[ static_query_(next_token|prev_token)_get ]__
-SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
 __[ dynamic_query_(add_expr) ]__
 INSERT INTO expr ([% columns %]) VALUES ([% ids %])
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
