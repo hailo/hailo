@@ -340,6 +340,7 @@ sub make_reply {
     my $tokens = shift // [];
     $self->_engage() if !$self->_engaged;
     my $order = $self->order;
+    my $schema = $self->schema;
 
     # we will favor these tokens when making the reply
     my @key_tokens = @$tokens;
@@ -412,9 +413,14 @@ sub make_reply {
     # translate token ids to token spacing/text
     my @reply;
     for my $id (@token_ids) {
+        # XXX: This cache can probably be implemented in terms of DBIx::Class caching
         if (!exists $token_cache{$id}) {
-            $self->sth->{token_info}->execute($id);
-            $token_cache{$id} = [$self->sth->{token_info}->fetchrow_array];
+            # SELECT spacing, text FROM token WHERE id = ?;
+            my $token_info = $schema->resultset('Token')->find(
+                { id => $id },
+                { columns => [ qw/ spacing text / ] },
+            );
+            $token_cache{$id} = [ $token_info->spacing, $token_info->text ];
         }
         push @reply, $token_cache{$id};
     }
@@ -731,8 +737,6 @@ SELECT * from expr
     [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
 [% END %]
   LIMIT 1;
-__[ static_query_token_info ]__
-SELECT spacing, text FROM token WHERE id = ?;
 __[ static_query_token_similar ]__
 SELECT id, spacing FROM token WHERE text = ?
 [% SWITCH dbd %]
