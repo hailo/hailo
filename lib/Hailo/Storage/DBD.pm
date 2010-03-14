@@ -161,15 +161,6 @@ sub _sth_sections_static {
 
     $sections{$_} = undef for @plain_sections;
 
-    for my $np (qw(next_token prev_token)) {
-        for my $ciag (qw(inc add)) {
-            $sections{$np . '_' . $ciag} = {
-                section => "(next_token|prev_token)_$ciag",
-                options => { table => $np },
-            };
-        }
-    }
-
     return \%sections, $prefix;;
 }
 
@@ -451,19 +442,19 @@ sub learn_tokens {
         # add link to next token for this expression, if any
         if ($i < @$tokens - $order) {
             my $next_id = $token_cache{ join('', @{ $tokens->[$i+$order] }) };
-            $self->_inc_link('Next', $expr_id, $next_id);
+            $self->_inc_link('NextToken', $expr_id, $next_id);
         }
 
         # add link to previous token for this expression, if any
         if ($i > 0) {
             my $prev_id = $token_cache{ join('', @{ $tokens->[$i-1] }) };
-            $self->_inc_link('Prev', $expr_id, $prev_id);
+            $self->_inc_link('PrevToken', $expr_id, $prev_id);
         }
 
         # add links to boundary token if appropriate
         my $b = $self->_boundary_token_id;
-        $self->_inc_link('Prev', $expr_id, $b) if $i == 0;
-        $self->_inc_link('Next', $expr_id, $b) if $i == @$tokens-$order;
+        $self->_inc_link('PrevToken', $expr_id, $b) if $i == 0;
+        $self->_inc_link('NextToken', $expr_id, $b) if $i == @$tokens-$order;
     }
 
     return;
@@ -497,9 +488,13 @@ sub _find_rare_tokens {
 sub _inc_link {
     my ($self, $type, $expr_id, $token_id) = @_;
     my $schema = $self->schema;
+    my %cols = (
+        expr_id  => $expr_id,
+        token_id => $token_id,
+    );
 
     # SELECT count FROM [% table %] WHERE expr_id = ? AND token_id = ?;
-    my $rs = $schema->resultset("${type}Token")->find(
+    my $rs = $schema->resultset($type)->find(
         {
             expr_id  => $expr_id,
             token_id => $token_id,
@@ -507,11 +502,22 @@ sub _inc_link {
         { columns => 'count' },
     );
 
-    if (defined $rs) {
-        $self->sth->{lc "${type}_token_inc"}->execute($expr_id, $token_id);
-    }
-    else {
-        $self->sth->{lc "${type}_token_add"}->execute($expr_id, $token_id);
+    given ($rs) {
+        when (defined) {
+            # UPDATE [% table %] SET count = count + 1 WHERE expr_id = ? AND token_id = ?
+            $schema->resultset($type)->search(
+                \%cols, {}
+            )->update({
+                count => \'count + 1'
+            });
+        }
+        default {
+            # INSERT INTO [% table %] (expr_id, token_id, count) VALUES (?, ?, 1);
+            $schema->resultset($type)->create({
+                %cols,
+                count => 1,
+            });
+        }
     }
 
     return;
@@ -772,10 +778,6 @@ __[ static_query_last_expr_rowid ]_
 SELECT id FROM expr ORDER BY id DESC LIMIT 1;
 __[ static_query_last_token_rowid ]__
 SELECT id FROM token ORDER BY id DESC LIMIT 1;
-__[ static_query_(next_token|prev_token)_inc ]__
-UPDATE [% table %] SET count = count + 1 WHERE expr_id = ? AND token_id = ?
-__[ static_query_(next_token|prev_token)_add ]__
-INSERT INTO [% table %] (expr_id, token_id, count) VALUES (?, ?, 1);
 __[ dynamic_query_(add_expr) ]__
 INSERT INTO expr ([% columns %]) VALUES ([% ids %])
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
