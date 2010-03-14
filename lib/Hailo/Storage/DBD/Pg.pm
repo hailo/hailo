@@ -64,12 +64,6 @@ sub _add_expr {
     return $self->sth->{add_expr}->fetchrow_array;
 }
 
-sub _add_token {
-    my ($self, $token_info) = @_;
-    $self->sth->{add_token}->execute(@$token_info);
-    return $self->sth->{add_token}->fetchrow_array;
-}
-
 __PACKAGE__->meta->make_immutable;
 
 =encoding utf8

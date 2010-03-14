@@ -205,15 +205,8 @@ sub _engage {
         );
         $self->order($res->text);
 
-        my $token_id = $schema->resultset('Token')->find(
-            {
-                spacing => 0,
-                text    => '',
-            },
-            { columns => [ 'id' ] },
-        );
-
-        $self->_boundary_token_id($token_id->id);
+        my $token_id = $self->_add_token(0, '');
+        $self->_boundary_token_id($token_id);
     }
     else {
         $self->_create_db();
@@ -225,10 +218,13 @@ sub _engage {
             text      => $self->order,
         });
 
-        $self->sth->{add_token}->execute(0, '');
-        $self->sth->{last_token_rowid}->execute();
-        my $id = $self->sth->{last_token_rowid}->fetchrow_array();
-        $self->_boundary_token_id($id);
+        # INSERT INTO token (spacing, text, count) VALUES (?, ?, 0)
+        my $rs = $schema->resultset('Token')->create({
+            spacing => 0,
+            text    => '',
+            count   => 0,
+        });
+        $self->_boundary_token_id($rs->id);
     }
 
     # prepare SQL statements which depend on the Markov order
@@ -597,9 +593,14 @@ sub _token_similar {
 # add a new token and return its id
 sub _add_token {
     my ($self, $token_info) = @_;
-    $self->sth->{add_token}->execute(@$token_info);
-    $self->sth->{last_token_rowid}->execute();
-    return $self->sth->{last_token_rowid}->fetchrow_array;
+    my $schema = $self->schema;
+
+    my $rs = $schema->resultset('Token')->create({
+        spacing => $token_info->[0],
+        text    => $token_info->[1],
+        count   => 0,
+    });
+    return $rs->id;
 }
 
 # return a random expression containing the given token
@@ -787,8 +788,6 @@ SELECT * from expr
     [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
 [% END %]
   LIMIT 1;
-__[ static_query_add_token ]__
-INSERT INTO token (spacing, text, count) VALUES (?, ?, 0)
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
 __[ static_query_last_expr_rowid ]_
 SELECT id FROM expr ORDER BY id DESC LIMIT 1;
