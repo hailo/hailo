@@ -520,12 +520,18 @@ sub _expr_id {
 # return token id if the token exists
 sub _token_id {
     my ($self, $token_info) = @_;
+    my $schema = $self->schema;
 
-    $self->sth->{token_id}->execute(@$token_info);
-    my $token_id = $self->sth->{token_id}->fetchrow_array();
-
+    # SELECT id FROM token WHERE spacing = ? AND text = ?;
+    my $token_id = $schema->resultset('Token')->find(
+        {
+            spacing => $token_info->[0],
+            text    => $token_info->[1],
+        },
+        { columns => [ 'id' ] },
+    );
     return if !defined $token_id;
-    return $token_id;
+    return $token_id->id;
 }
 
 # get token id (adding the token if it doesn't exist)
@@ -719,8 +725,6 @@ SELECT * from expr
     [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
 [% END %]
   LIMIT 1;
-__[ static_query_token_id ]__
-SELECT id FROM token WHERE spacing = ? AND text = ?;
 __[ static_query_token_info ]__
 SELECT spacing, text FROM token WHERE id = ?;
 __[ static_query_token_similar ]__
