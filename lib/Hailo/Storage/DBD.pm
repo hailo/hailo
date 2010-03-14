@@ -8,6 +8,7 @@ BEGIN {
     MooseX::StrictConstructor->import;
 }
 use DBI;
+use Hailo::Storage::Schema;
 use List::Util qw<first shuffle>;
 use List::MoreUtils qw<uniq>;
 use Data::Section qw(-setup);
@@ -52,6 +53,25 @@ sub _build_dbh {
 
     return DBI->connect($self->dbi_options);
 };
+
+has schema => (
+    isa => 'Hailo::Storage::Schema',
+    is => 'ro',
+    lazy_build => 1,
+    documentation => "A Hailo::Storage::Schema instance of DBIx::Class",
+);
+
+sub _build_schema {
+    my ($self) = @_;
+
+    my $schema = Hailo::Storage::Schema->connect(
+        sub { $self->dbh },
+        # See http://search.cpan.org/~ribasushi/DBIx-Class-0.08120/lib/DBIx/Class/Storage/DBI.pm#DBIx::Class_specific_connection_attributes
+        {},
+    );
+
+    return $schema;
+}
 
 has dbi_options => (
     isa           => ArrayRef,
@@ -434,12 +454,16 @@ sub learn_tokens {
 sub _find_rare_tokens {
     my ($self, $token_ids, $min) = @_;
     return if !@$token_ids;
+    my $schema = $self->schema;
 
     my %links;
     for my $id (@$token_ids) {
         next if exists $links{$id};
-        $self->sth->{token_count}->execute($id);
-        $links{$id} = $self->sth->{token_count}->fetchrow_array;
+        my $res = $schema->resultset('Token')->find(
+            { id => $id },
+            { columns => [ 'count' ] },
+        );
+        $links{$id} = $res->count;
     }
 
     # remove tokens which are too rare
