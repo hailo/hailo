@@ -162,7 +162,7 @@ sub _sth_sections_static {
     $sections{$_} = undef for @plain_sections;
 
     for my $np (qw(next_token prev_token)) {
-        for my $ciag (qw(count inc add)) {
+        for my $ciag (qw(inc add)) {
             $sections{$np . '_' . $ciag} = {
                 section => "(next_token|prev_token)_$ciag",
                 options => { table => $np },
@@ -451,19 +451,19 @@ sub learn_tokens {
         # add link to next token for this expression, if any
         if ($i < @$tokens - $order) {
             my $next_id = $token_cache{ join('', @{ $tokens->[$i+$order] }) };
-            $self->_inc_link('next_token', $expr_id, $next_id);
+            $self->_inc_link('Next', $expr_id, $next_id);
         }
 
         # add link to previous token for this expression, if any
         if ($i > 0) {
             my $prev_id = $token_cache{ join('', @{ $tokens->[$i-1] }) };
-            $self->_inc_link('prev_token', $expr_id, $prev_id);
+            $self->_inc_link('Prev', $expr_id, $prev_id);
         }
 
         # add links to boundary token if appropriate
         my $b = $self->_boundary_token_id;
-        $self->_inc_link('prev_token', $expr_id, $b) if $i == 0;
-        $self->_inc_link('next_token', $expr_id, $b) if $i == @$tokens-$order;
+        $self->_inc_link('Prev', $expr_id, $b) if $i == 0;
+        $self->_inc_link('Next', $expr_id, $b) if $i == @$tokens-$order;
     }
 
     return;
@@ -496,15 +496,22 @@ sub _find_rare_tokens {
 # increase the link weight between an expression and a token
 sub _inc_link {
     my ($self, $type, $expr_id, $token_id) = @_;
+    my $schema = $self->schema;
 
-    $self->sth->{"${type}_count"}->execute($expr_id, $token_id);
-    my $count = $self->sth->{"${type}_count"}->fetchrow_array;
+    # SELECT count FROM [% table %] WHERE expr_id = ? AND token_id = ?;
+    my $rs = $schema->resultset("${type}Token")->find(
+        {
+            expr_id  => $expr_id,
+            token_id => $token_id,
+        },
+        { columns => 'count' },
+    );
 
-    if (defined $count) {
-        $self->sth->{"${type}_inc"}->execute($expr_id, $token_id);
+    if (defined $rs) {
+        $self->sth->{lc "${type}_token_inc"}->execute($expr_id, $token_id);
     }
     else {
-        $self->sth->{"${type}_add"}->execute($expr_id, $token_id);
+        $self->sth->{lc "${type}_token_add"}->execute($expr_id, $token_id);
     }
 
     return;
@@ -767,8 +774,6 @@ __[ static_query_last_expr_rowid ]_
 SELECT id FROM expr ORDER BY id DESC LIMIT 1;
 __[ static_query_last_token_rowid ]__
 SELECT id FROM token ORDER BY id DESC LIMIT 1;
-__[ static_query_(next_token|prev_token)_count ]__
-SELECT count FROM [% table %] WHERE expr_id = ? AND token_id = ?;
 __[ static_query_(next_token|prev_token)_inc ]__
 UPDATE [% table %] SET count = count + 1 WHERE expr_id = ? AND token_id = ?
 __[ static_query_(next_token|prev_token)_add ]__
