@@ -758,7 +758,4 @@ SELECT * from expr
     [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
 [% END %]
   LIMIT 1;
-__[ static_query_last_expr_rowid ]_
-SELECT id FROM expr ORDER BY id DESC LIMIT 1;
-__[ static_query_last_token_rowid ]__
-SELECT id FROM token ORDER BY id DESC LIMIT 1;
+
