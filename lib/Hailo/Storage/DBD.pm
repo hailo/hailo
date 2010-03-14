@@ -347,7 +347,7 @@ sub make_reply {
         my $text = $token_info->[1];
         my $info = $self->_token_similar($text);
         next if !defined $info;
-        my ($id, $spacing) = @$info;
+        my ($id, $spacing) = ($info->id, $info->spacing);
         next if !defined $id;
         push @key_ids, $id;
         next if exists $token_cache{$id};
@@ -545,8 +545,22 @@ sub _add_expr {
 # look up an expression id based on tokens
 sub _expr_id {
     my ($self, $tokens) = @_;
-    $self->sth->{expr_id}->execute(@$tokens);
-    return $self->sth->{expr_id}->fetchrow_array();
+    my $schema = $self->schema;
+
+    my %where;
+    for my $i (0 .. $#$tokens) {
+        $where{"token${i}_id"} = $tokens->[$i];
+    }
+    # SELECT id FROM expr WHERE
+    # [% FOREACH i IN orders %]
+    #     token[% i %]_id = ? [% UNLESS loop.last %] AND [% END %]
+    # [% END %]
+    my $res = $schema->resultset('Expr')->find(
+        \%where,
+        { columns => 'id' },
+    );
+    return unless $res;
+    return $res->id;
 }
 
 # return token id if the token exists
@@ -790,9 +804,4 @@ SELECT * FROM expr WHERE [% column %] = ?
 [% SWITCH dbd %]
     [% CASE 'mysql'  %]ORDER BY RAND()   LIMIT 1;
     [% CASE DEFAULT  %]ORDER BY RANDOM() LIMIT 1;
-[% END %]
-__[ dynamic_query_expr_id ]__
-SELECT id FROM expr WHERE
-[% FOREACH i IN orders %]
-    token[% i %]_id = ? [% UNLESS loop.last %] AND [% END %]
 [% END %]
