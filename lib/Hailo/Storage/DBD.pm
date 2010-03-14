@@ -421,6 +421,7 @@ sub make_reply {
 sub learn_tokens {
     my ($self, $tokens) = @_;
     my $order = $self->order;
+    my $schema = $self->schema;
     my %token_cache;
 
     for my $token (@$tokens) {
@@ -436,7 +437,13 @@ sub learn_tokens {
 
         if (!defined $expr_id) {
             $expr_id = $self->_add_expr(\@expr);
-            $self->sth->{inc_token_count}->execute($_) for uniq(@expr);
+
+            for (uniq(@expr)) {
+                # UPDATE token SET count = count + 1 WHERE id = ?;
+                $schema->resultset("Token")->search( { id => $_ }, undef )->update({
+                    count => \'count + 1'
+                });
+            }
         }
 
         # add link to next token for this expression, if any
@@ -772,8 +779,6 @@ SELECT id, spacing FROM token WHERE text = ?
 __[ static_query_add_token ]__
 INSERT INTO token (spacing, text, count) VALUES (?, ?, 0)
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
-__[ static_query_inc_token_count ]__
-UPDATE token SET count = count + 1 WHERE id = ?;
 __[ static_query_last_expr_rowid ]_
 SELECT id FROM expr ORDER BY id DESC LIMIT 1;
 __[ static_query_last_token_rowid ]__
