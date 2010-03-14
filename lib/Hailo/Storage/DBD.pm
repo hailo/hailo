@@ -212,9 +212,14 @@ sub _engage {
     my ($self) = @_;
 
     if ($self->_exists_db) {
-        $self->sth->{get_order}->execute();
-        my $order = $self->sth->{get_order}->fetchrow_array();
-        $self->order($order);
+        my $schema =  $self->schema;
+
+        # SELECT text FROM info WHERE attribute = 'markov_order';
+        my $res = $schema->resultset('Info')->find(
+            { attribute => 'markov_order' },
+            { columns => [ 'text' ] },
+        );
+        $self->order($res->text);
 
         $self->sth->{token_id}->execute(0, '');
         my $id = $self->sth->{token_id}->fetchrow_array;
@@ -223,8 +228,12 @@ sub _engage {
     else {
         $self->_create_db();
 
-        my $order = $self->order;
-        $self->sth->{set_order}->execute($order);
+        my $schema = $self->schema;
+        # INSERT INTO info (attribute, text) VALUES ('markov_order', ?);
+        $schema->resultset('Info')->create({
+            attribute => 'markov_order',
+            text      => $self->order,
+        });
 
         $self->sth->{add_token}->execute(0, '');
         $self->sth->{last_token_rowid}->execute();
@@ -704,10 +713,6 @@ CREATE INDEX token_text on token (text);
 CREATE INDEX expr_token_ids on expr ([% columns %]);
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
-__[ static_query_get_order ]__
-SELECT text FROM info WHERE attribute = 'markov_order';
-__[ static_query_set_order ]__
-INSERT INTO info (attribute, text) VALUES ('markov_order', ?);
 __[ static_query_token_total ]__
 SELECT COUNT(id) FROM token;
 __[ static_query_expr_total ]__
