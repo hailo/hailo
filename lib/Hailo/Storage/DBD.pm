@@ -580,7 +580,6 @@ sub _add_token {
 # return a random expression containing the given token
 sub _random_expr {
     my ($self, $token_id) = @_;
-    my $dbh = $self->dbh;
 
     my $expr;
 
@@ -608,7 +607,6 @@ sub _random_expr {
 sub _pos_token {
     my ($self, $pos, $expr_id, $key_tokens) = @_;
     my $schema = $self->schema;
-    my $dbh = $self->dbh;
 
     # SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
     my @rs = $schema->resultset(ucfirst($pos).'Token')->search(
