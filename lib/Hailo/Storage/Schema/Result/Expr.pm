@@ -27,21 +27,12 @@ __PACKAGE__->table("expr");
   is_nullable: 1
   size: undef
 
-=head2 token0_id
+=head2 token*_id
 
   data_type: INTEGER
   default_value: undef
   is_foreign_key: 1
   is_nullable: 0
-  size: undef
-
-=head2 token1_id
-
-  data_type: INTEGER
-  default_value: undef
-  is_foreign_key: 1
-  is_nullable: 0
-  size: undef
 
 =cut
 
@@ -53,24 +44,23 @@ __PACKAGE__->add_columns(
     is_auto_increment => 1,
     is_nullable => 1,
     size => undef,
-  },
-  "token0_id",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_foreign_key => 1,
-    is_nullable => 0,
-    size => undef,
-  },
-  "token1_id",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_foreign_key => 1,
-    is_nullable => 0,
-    size => undef,
-  },
+  }
 );
+
+sub add_tokenN_id {
+    my ($self, $n) = @_;
+    __PACKAGE__->add_columns(
+        "token${n}_id",
+        {
+            data_type => "INTEGER",
+            default_value => undef,
+            is_foreign_key => 1,
+            is_nullable => 0,
+            size => undef,
+        },
+    );
+}
+
 __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
