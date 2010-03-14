@@ -762,4 +762,3 @@ SELECT * from expr
     [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
 [% END %]
   LIMIT 1;
-
