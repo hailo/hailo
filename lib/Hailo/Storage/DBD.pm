@@ -578,8 +578,13 @@ sub _token_id_add {
 # return all tokens (regardless of spacing) that consist of this text
 sub _token_similar {
     my ($self, $token_text) = @_;
-    $self->sth->{token_similar}->execute($token_text);
-    return $self->sth->{token_similar}->fetchrow_arrayref;
+    my $schema = $self->schema;
+
+    # SELECT id, spacing FROM token WHERE text = ? ORDER BY RANDOM() LIMIT 1
+    return $schema->resultset('Token')->search(
+        { text => $token_text },
+        { columns => [ qw/id spacing/ ] }
+    )->rand->single;
 }
 
 # add a new token and return its id
@@ -770,12 +775,6 @@ SELECT * from expr
     [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
 [% END %]
   LIMIT 1;
-__[ static_query_token_similar ]__
-SELECT id, spacing FROM token WHERE text = ?
-[% SWITCH dbd %]
-    [% CASE 'mysql'  %]ORDER BY RAND()   LIMIT 1;
-    [% CASE DEFAULT  %]ORDER BY RANDOM() LIMIT 1;
-[% END %]
 __[ static_query_add_token ]__
 INSERT INTO token (spacing, text, count) VALUES (?, ?, 0)
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
