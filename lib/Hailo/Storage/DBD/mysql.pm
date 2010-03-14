@@ -44,8 +44,10 @@ sub _build_dbi_options {
 
 sub _exists_db {
     my ($self) = @_;
-    $self->sth->{exists_db}->execute();
-    return defined $self->sth->{exists_db}->fetchrow_array;
+    my $dbh = $self->dbh;
+    my $sth = $dbh->prepare("SHOW TABLES");
+    $sth->execute();
+    return defined $sth->fetchrow_array;
 }
 
 sub ready {
@@ -177,7 +179,3 @@ This program is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-__DATA__
-__[ static_query_exists_db ]__
-SHOW TABLES;
