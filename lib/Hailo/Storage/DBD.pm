@@ -164,33 +164,6 @@ sub _sth_sections_static {
     return \%sections, $prefix;;
 }
 
-# return SQL statements which are dependent on the Markov order
-sub _sth_sections_dynamic {
-    my ($self) = @_;
-    my %sections;
-    my $prefix = 'dynamic_query_';
-
-    # () sections are magical
-    my @plain_sections = grep { /^$prefix/ and not /\(.*?\)/ } $self->section_data_names;
-    s[^$prefix][] for @plain_sections;
-
-    $sections{$_} = undef for @plain_sections;
-
-    {
-        my @columns = map { "token${_}_id" } 0 .. $self->order-1;
-        my @ids = join(', ', ('?') x @columns);
-        $sections{add_expr} = {
-            section => '(add_expr)',
-            options => {
-                columns => join(', ', @columns),
-                ids     => join(', ', @ids),
-            }
-        }
-    }
-
-    return \%sections, $prefix;
-}
-
 # bootstrap the database
 sub _engage {
     my ($self) = @_;
@@ -225,13 +198,6 @@ sub _engage {
             count   => 0,
         });
         $self->_boundary_token_id($rs->id);
-    }
-
-    # prepare SQL statements which depend on the Markov order
-    my ($sections, $prefix) = $self->_sth_sections_dynamic();
-    my $sth = $self->_prepare_sth($sections, $prefix);
-    while (my ($query, $st) = each %$sth) {
-        $self->sth->{$query} = $st;
     }
 
     $self->_engaged(1);
@@ -522,13 +488,17 @@ sub _inc_link {
 # add new expression to the database
 sub _add_expr {
     my ($self, $token_ids) = @_;
+    my $schema = $self->schema;
 
-    # add the expression
-    $self->sth->{add_expr}->execute(@$token_ids);
+    my %columns;
+    for my $i (0 .. $#$token_ids) {
+        $columns{"token${i}_id"} = $token_ids->[$i];
+    }
 
-    # get the new expr id
-    $self->sth->{last_expr_rowid}->execute();
-    return $self->sth->{last_expr_rowid}->fetchrow_array;
+    # INSERT INTO expr ([% columns %]) VALUES ([% ids %])
+    my $rs = $schema->resultset('Expr')->create(\%columns);
+
+    return $rs->id;
 }
 
 # look up an expression id based on tokens
@@ -793,6 +763,3 @@ __[ static_query_last_expr_rowid ]_
 SELECT id FROM expr ORDER BY id DESC LIMIT 1;
 __[ static_query_last_token_rowid ]__
 SELECT id FROM token ORDER BY id DESC LIMIT 1;
-__[ dynamic_query_(add_expr) ]__
-INSERT INTO expr ([% columns %]) VALUES ([% ids %])
-[% IF dbd == 'Pg' %] RETURNING id[% END %];
