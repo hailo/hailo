@@ -155,8 +155,7 @@ sub _sth_sections_static {
     my %sections;
     my $prefix = 'static_query_';
 
-    # () sections are magical
-    my @plain_sections = grep { /^$prefix/ and not /\(.*?\)/ } $self->section_data_names;
+    my @plain_sections = grep { /^$prefix/ } $self->section_data_names;
     s[^$prefix][] for @plain_sections;
 
     $sections{$_} = undef for @plain_sections;
