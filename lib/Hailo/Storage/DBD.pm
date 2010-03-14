@@ -176,13 +176,6 @@ sub _sth_sections_dynamic {
 
     $sections{$_} = undef for @plain_sections;
 
-    for my $order (0 .. $self->order-1) {
-        $sections{"expr_by_token${order}_id"} = {
-            section => 'expr_by_token(NUM)_id',
-            options => { column => "token${order}_id" },
-        };
-    }
-
     {
         my @columns = map { "token${_}_id" } 0 .. $self->order-1;
         my @ids = join(', ', ('?') x @columns);
@@ -612,6 +605,7 @@ sub _add_token {
 # return a random expression containing the given token
 sub _random_expr {
     my ($self, $token_id) = @_;
+    my $schema = $self->schema;
 
     my $expr;
 
@@ -622,11 +616,15 @@ sub _random_expr {
     else {
         # try the positions in a random order
         for my $pos (shuffle 0 .. $self->order-1) {
-            my $column = "token${pos}_id";
+            # SELECT * FROM expr WHERE [% column %] = ? ORDER BY RANDOM() LIMIT 1;
+            my @columns = ('id', map { "token${_}_id" } 0 .. $self->order-1);
+            my $rs = $schema->resultset('Expr')->search(
+                { "token${pos}_id" => $token_id },
+                { columns => \@columns }
+            )->rand->single;
 
             # get a random expression which includes the token at this position
-            $self->sth->{"expr_by_$column"}->execute($token_id);
-            $expr = $self->sth->{"expr_by_$column"}->fetchrow_arrayref();
+            $expr = [ map { $rs->$_ } @columns ] if $rs;
             last if defined $expr;
         }
     }
@@ -799,9 +797,3 @@ SELECT id FROM token ORDER BY id DESC LIMIT 1;
 __[ dynamic_query_(add_expr) ]__
 INSERT INTO expr ([% columns %]) VALUES ([% ids %])
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
-__[ dynamic_query_expr_by_token(NUM)_id ]__
-SELECT * FROM expr WHERE [% column %] = ?
-[% SWITCH dbd %]
-    [% CASE 'mysql'  %]ORDER BY RAND()   LIMIT 1;
-    [% CASE DEFAULT  %]ORDER BY RANDOM() LIMIT 1;
-[% END %]
