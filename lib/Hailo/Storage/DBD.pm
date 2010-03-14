@@ -760,8 +760,6 @@ __[ static_query_(next_token|prev_token)_add ]__
 INSERT INTO [% table %] (expr_id, token_id, count) VALUES (?, ?, 1);
 __[ static_query_(next_token|prev_token)_get ]__
 SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
-__[ static_query_token_count ]__
-SELECT count FROM token WHERE id = ?;
 __[ dynamic_query_(add_expr) ]__
 INSERT INTO expr ([% columns %]) VALUES ([% ids %])
 [% IF dbd == 'Pg' %] RETURNING id[% END %];
