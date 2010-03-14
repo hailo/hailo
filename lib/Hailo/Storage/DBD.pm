@@ -317,15 +317,13 @@ sub _get_create_db_sql {
 sub totals {
     my ($self) = @_;
     $self->_engage() if !$self->_engaged;
+    my $schema = $self->schema;
 
-    $self->sth->{token_total}->execute();
-    my $token = $self->sth->{token_total}->fetchrow_array - 1;
-    $self->sth->{expr_total}->execute();
-    my $expr = $self->sth->{expr_total}->fetchrow_array // 0;
-    $self->sth->{prev_total}->execute();
-    my $prev = $self->sth->{prev_total}->fetchrow_array // 0;
-    $self->sth->{next_total}->execute();
-    my $next = $self->sth->{next_total}->fetchrow_array // 0;
+    # SELECT COUNT(*) from $table;
+    my $token = $schema->resultset("Token")->count - 1,
+    my $expr  = $schema->resultset("Expr")->count // 0,
+    my $prev  = $schema->resultset("PrevToken")->count // 0,
+    my $next  = $schema->resultset("NextToken")->count // 0;
 
     return $token, $expr, $prev, $next;
 }
@@ -713,14 +711,6 @@ CREATE INDEX token_text on token (text);
 CREATE INDEX expr_token_ids on expr ([% columns %]);
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
-__[ static_query_token_total ]__
-SELECT COUNT(id) FROM token;
-__[ static_query_expr_total ]__
-SELECT COUNT(id) FROM expr;
-__[ static_query_prev_total ]__
-SELECT COUNT(id) FROM prev_token;
-__[ static_query_next_total ]__
-SELECT COUNT(id) FROM next_token;
 __[ static_query_random_expr ]__
 SELECT * from expr
 [% SWITCH dbd %]
