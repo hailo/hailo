@@ -109,7 +109,7 @@ sub _engage {
     my ($self) = @_;
 
     for (0 .. $self->order - 1) {
-        Hailo::Storage::Schema::Result::Expr->add_tokenN_id($_) ;
+        Hailo::Storage::Schema::Result::Expr->add_tokenN_id($_);
     }
 
     if ($self->_exists_db) {
