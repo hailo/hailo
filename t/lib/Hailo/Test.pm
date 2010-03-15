@@ -401,7 +401,7 @@ sub test_babble {
         my ($err, $tokens) = $self->train_a_few_tokens();
 
         my $input = $tokens->[5];
-        pass("Training on <<$input>>");
+        pass("Replying to <<$input>>");
         my $reply = $hailo->reply($input);
         # Hailo replies
         cmp_ok(length($reply) * 2, '>', length($input), "$storage: Hailo knows how to babble, said '$reply' given '$input'");
