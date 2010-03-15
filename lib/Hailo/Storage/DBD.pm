@@ -583,15 +583,34 @@ sub _random_expr {
 
     my $expr;
 
+    my @columns = ('id', map { "token${_}_id" } 0 .. $self->order-1);
+
     if (!defined $token_id) {
-        $self->sth->{random_expr}->execute();
-        $expr = $self->sth->{random_expr}->fetchrow_arrayref();
+        my $rand;
+
+        given ($self->dbd) {
+            when ('Pg')    { $rand = '(random()*id+1)::int' }
+            when ('mysql') { $rand = '(abs(rand()) % (SELECT max(id) FROM expr))' }
+            when ('SQLite') { $rand = '(abs(random()) % (SELECT max(id) FROM expr))' }
+            default         { die "Hailo doesn't support your $_ database yet" }
+        }
+
+        # SELECT * from expr WHERE id >= (abs(random()) % (SELECT max(id) FROM expr)) LIMIT 1;
+        my $rs = $schema->resultset('Expr')->search(
+            { id => { '>=', \$rand } },
+            {
+                columns => \@columns,
+                result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+                rows => 1,
+            }
+        )->single;
+
+        $expr = [ map { $rs->{$_} } @columns ] if $rs;
     }
     else {
         # try the positions in a random order
         for my $pos (shuffle 0 .. $self->order-1) {
             # SELECT * FROM expr WHERE [% column %] = ? ORDER BY RANDOM() LIMIT 1;
-            my @columns = ('id', map { "token${_}_id" } 0 .. $self->order-1);
             my $rs = $schema->resultset('Expr')->search(
                 { "token${pos}_id" => $token_id },
                 { columns => \@columns }
@@ -753,11 +772,3 @@ CREATE INDEX token_text on token (text);
 CREATE INDEX expr_token_ids on expr ([% columns %]);
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
-__[ static_query_random_expr ]__
-SELECT * from expr
-[% SWITCH dbd %]
-    [% CASE 'Pg'    %]WHERE id >= (random()*id+1)::int
-    [% CASE 'mysql' %]WHERE id >= (abs(rand()) % (SELECT max(id) FROM expr))
-    [% CASE DEFAULT %]WHERE id >= (abs(random()) % (SELECT max(id) FROM expr))
-[% END %]
-  LIMIT 1;
