@@ -179,7 +179,7 @@ sub stop_learning {
 
 sub _create_db {
     my ($self) = @_;
-    my @statements = $self->_table_sql;
+    chomp(my @statements = $self->_table_sql);
 
     for (@statements) {
         $self->dbh->do($_);
@@ -674,9 +674,10 @@ CREATE TABLE token (
 CREATE TABLE expr (
     id $serial,] .
     do {
-        join "\n,", map { qq[token${_}_id INTEGER NOT NULL REFERENCES token (id)] } @orders
+        join(",", map { qq[\n    token${_}_id INTEGER NOT NULL REFERENCES token (id)] } @orders)
     } .
-q[);];
+q[
+);];
 
         my $next_token = qq[
 CREATE TABLE next_token (
@@ -692,14 +693,14 @@ CREATE TABLE prev_token (
     token_id INTEGER NOT NULL REFERENCES token (id),
     count    INTEGER NOT NULL
 );];
-        my $indexes = qq[
-CREATE INDEX token_text on token (text);
-] . do {
-    join "\n;", map { qq[CREATE INDEX expr_token${_}_id on expr (token${_}_id);] } @orders
-} . qq[
-CREATE INDEX expr_token_ids on expr ( $columns );
+        my $indexes = qq[CREATE INDEX token_text on token (text);] .
+do {
+    join "", map { qq[CREATE INDEX expr_token${_}_id on expr (token${_}_id);] } @orders
+} . 
+qq[CREATE INDEX expr_token_ids on expr ($columns);
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
 ];
-    return ($info, $token, $expr, $next_token, $prev_token, $indexes);
+    my $sql = $info . $token . $expr . $next_token . $prev_token . $indexes;
+    return ($sql =~ /\s*(.*?)\s*;\s*/gs);
 }
