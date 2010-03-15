@@ -104,64 +104,10 @@ has _engaged => (
     documentation => 'Have we done setup work to get this database going?',
 );
 
-has sth => (
-    isa        => HashRef,
-    is         => 'ro',
-    lazy_build => 1,
-    documentation => 'A HashRef of prepared DBI statement handles',
-);
-
-# our statement handlers
-sub _build_sth {
-    my ($self) = @_;
-    my ($sections, $prefix) = $self->_sth_sections_static();
-    return $self->_prepare_sth($sections, $prefix);
-}
-
 has _boundary_token_id => (
     isa => Int,
     is  => 'rw',
 );
-
-# create statement handle objects
-sub _prepare_sth {
-    my ($self, $sections, $prefix) = @_;
-
-    my %state;
-    while (my ($name, $options) = each %$sections) {
-        my $section = $options->{section} // $name;
-        my %options = %{ $options->{options} // {} };
-        my $template = $self->section_data("$prefix$section");
-        my $sql;
-        Template->new->process(
-            $template,
-            {
-                orders => [ 0 .. $self->order-1 ],
-                dbd    => $self->dbd,
-                %options,
-            },
-            \$sql,
-        );
-        $state{$name} = $sql;
-    }
-
-    $state{$_} = $self->dbh->prepare($state{$_}) for keys %state;
-    return \%state;
-}
-
-# return SQL statements which are not dependent on the Markov order
-sub _sth_sections_static {
-    my ($self) = @_;
-    my %sections;
-    my $prefix = 'static_query_';
-
-    my @plain_sections = grep { /^$prefix/ } $self->section_data_names;
-    s[^$prefix][] for @plain_sections;
-
-    $sections{$_} = undef for @plain_sections;
-
-    return \%sections, $prefix;;
-}
 
 # bootstrap the database
 sub _engage {
