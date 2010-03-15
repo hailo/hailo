@@ -122,7 +122,7 @@ sub _engage {
         );
         $self->order($res->text);
 
-        my $token_id = $self->_add_token(0, '');
+        my $token_id = $self->_add_token([0, '']);
         $self->_boundary_token_id($token_id);
     }
     else {
