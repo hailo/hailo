@@ -179,34 +179,13 @@ sub stop_learning {
 
 sub _create_db {
     my ($self) = @_;
-    my @statements = $self->_get_create_db_sql;
+    my @statements = $self->_table_sql;
 
     for (@statements) {
         $self->dbh->do($_);
     }
 
     return;
-}
-
-sub _get_create_db_sql {
-    my ($self) = @_;
-    my $sql;
-
-    my @create = $self->_table_sql;
-
-    for my $template (@create) {
-        Template->new->process(
-            $template,
-            {
-                columns => join(', ', map { "token${_}_id" } 0 .. $self->order-1),
-                orders  => [ 0 .. $self->order-1 ],
-                dbd     => $self->dbd,
-            },
-            \$sql,
-        );
-    }
-
-    return ($sql =~ /\s*(.*?);/gs);
 }
 
 # return some statistics
@@ -656,6 +635,7 @@ sub _table_sql {
     my ($self) = @_;
     my $dbd = $self->dbd;
     my @orders = (0 .. $self->order-1);
+    my $columns = join(', ', map { "token${_}_id" } @orders);
 
     my $serial = do {
         my $txt;
@@ -713,10 +693,10 @@ CREATE TABLE prev_token (
 CREATE INDEX token_text on token (text);
 ] . do {
     join "\n;", map { qq[CREATE INDEX expr_token${_}_id on expr (token${_}_id);] } @orders
-} . q[
-CREATE INDEX expr_token_ids on expr ([% columns %]);
+} . qq[
+CREATE INDEX expr_token_ids on expr ( $columns );
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
 ];
-    return (\$info, \$token, \$expr, \$next_token, \$prev_token, \$indexes);
+    return ($info, $token, $expr, $next_token, $prev_token, $indexes);
 }
