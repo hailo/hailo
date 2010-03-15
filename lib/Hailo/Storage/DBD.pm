@@ -11,13 +11,8 @@ use DBI;
 use Hailo::Storage::Schema;
 use List::Util qw<first shuffle>;
 use List::MoreUtils qw<uniq>;
-use Data::Section qw(-setup);
 use Template;
-use namespace::clean -except => [ qw(meta
-                                     section_data
-                                     section_data_names
-                                     merged_section_data
-                                     merged_section_data_names) ];
+use namespace::clean -except => 'meta';
 
 has dbd => (
     isa           => Str,
@@ -198,8 +193,9 @@ sub _get_create_db_sql {
     my ($self) = @_;
     my $sql;
 
-    for my $section (qw(info token expr next_token prev_token indexes)) {
-        my $template = $self->section_data("table_$section");
+    my @create = $self->table_sql;
+
+    for my $template (@create) {
         Template->new->process(
             $template,
             {
@@ -657,8 +653,10 @@ it under the same terms as Perl itself.
 
 =cut
 
-__DATA__
-__[ table_info ]__
+sub table_sql {
+    my ($self) = @_;
+
+    my $info = <<'TABLE';
 CREATE TABLE info (
     attribute [% SWITCH dbd %]
                   [% CASE 'mysql' %]TEXT NOT NULL,
@@ -666,7 +664,8 @@ CREATE TABLE info (
               [% END %]
     text      TEXT NOT NULL
 );
-__[ table_token ]__
+TABLE
+    my $token = <<'TABLE';
 CREATE TABLE token (
     id   [% SWITCH dbd %]
             [% CASE 'Pg'    %]SERIAL UNIQUE,
@@ -677,7 +676,8 @@ CREATE TABLE token (
     text [% IF dbd == 'mysql' %] VARCHAR(255) [% ELSE %] TEXT [% END %] NOT NULL,
     count INTEGER NOT NULL
 );
-__[ table_expr ]__
+TABLE
+        my $expr = <<'TABLE';
 CREATE TABLE expr (
     id  [% SWITCH dbd %]
             [% CASE 'Pg'    %]SERIAL UNIQUE
@@ -688,7 +688,8 @@ CREATE TABLE expr (
     token[% i %]_id INTEGER NOT NULL REFERENCES token (id)[% UNLESS loop.last %],[% END %]
 [% END %]
 );
-__[ table_next_token ]__
+TABLE
+        my $next_token = <<'TABLE';
 CREATE TABLE next_token (
     id       [% SWITCH dbd %]
                  [% CASE 'Pg'    %]SERIAL UNIQUE,
@@ -699,7 +700,8 @@ CREATE TABLE next_token (
     token_id INTEGER NOT NULL REFERENCES token (id),
     count    INTEGER NOT NULL
 );
-__[ table_prev_token ]__
+TABLE
+        my $prev_token = <<'TABLE';
 CREATE TABLE prev_token (
     id       [% SWITCH dbd %]
                  [% CASE 'Pg'    %]SERIAL UNIQUE,
@@ -710,7 +712,8 @@ CREATE TABLE prev_token (
     token_id INTEGER NOT NULL REFERENCES token (id),
     count    INTEGER NOT NULL
 );
-__[ table_indexes ]__
+TABLE
+        my $indexes = <<'TABLE';
 CREATE INDEX token_text on token (text);
 [% FOREACH i IN orders %]
     CREATE INDEX expr_token[% i %]_id on expr (token[% i %]_id);
@@ -718,3 +721,6 @@ CREATE INDEX token_text on token (text);
 CREATE INDEX expr_token_ids on expr ([% columns %]);
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
+TABLE
+    return (\$info, \$token, \$expr, \$next_token, \$prev_token, \$indexes);
+}
