@@ -11,7 +11,6 @@ use DBI;
 use Hailo::Storage::Schema;
 use List::Util qw<first shuffle>;
 use List::MoreUtils qw<uniq>;
-use Template;
 use namespace::clean -except => 'meta';
 
 has dbd => (
@@ -655,72 +654,69 @@ it under the same terms as Perl itself.
 
 sub _table_sql {
     my ($self) = @_;
+    my $dbd = $self->dbd;
+    my @orders = (0 .. $self->order-1);
 
-    my $info = <<'TABLE';
+    my $serial = do {
+        my $txt;
+        given ($dbd) {
+            when ('Pg')    { $txt = 'SERIAL UNIQUE' }
+            when ('mysql') { $txt = 'INTEGER PRIMARY KEY AUTO_INCREMENT' }
+            default        { $txt = 'INTEGER PRIMARY KEY AUTOINCREMENT' }
+        }
+        $txt;
+    };
+
+    my $info = q[
 CREATE TABLE info (
-    attribute [% SWITCH dbd %]
-                  [% CASE 'mysql' %]TEXT NOT NULL,
-                  [% CASE DEFAULT %]TEXT NOT NULL PRIMARY KEY,
-              [% END %]
+    attribute ] . do {
+        my $txt;
+        given ($dbd) {
+            when ('mysql') { $txt = 'TEXT NOT NULL,' }
+            default        { $txt = 'TEXT NOT NULL PRIMARY KEY,' }
+        }
+        $txt;
+    } . q[
     text      TEXT NOT NULL
-);
-TABLE
-    my $token = <<'TABLE';
+);];
+    my $token = qq[
 CREATE TABLE token (
-    id   [% SWITCH dbd %]
-            [% CASE 'Pg'    %]SERIAL UNIQUE,
-            [% CASE 'mysql' %]INTEGER PRIMARY KEY AUTO_INCREMENT,
-            [% CASE DEFAULT %]INTEGER PRIMARY KEY AUTOINCREMENT,
-         [% END %]
+    id $serial,
     spacing INTEGER NOT NULL,
-    text [% IF dbd == 'mysql' %] VARCHAR(255) [% ELSE %] TEXT [% END %] NOT NULL,
+    text ] . do { ($dbd eq 'mysql' ? ' VARCHAR(255) ' : ' TEXT ' ) . ' NOT NULL, ' } . q[
     count INTEGER NOT NULL
 );
-TABLE
-        my $expr = <<'TABLE';
+];
+        my $expr = qq[
 CREATE TABLE expr (
-    id  [% SWITCH dbd %]
-            [% CASE 'Pg'    %]SERIAL UNIQUE
-            [% CASE 'mysql' %]INTEGER PRIMARY KEY AUTO_INCREMENT
-            [% CASE DEFAULT %]INTEGER PRIMARY KEY AUTOINCREMENT
-        [% END %],
-[% FOREACH i IN orders %]
-    token[% i %]_id INTEGER NOT NULL REFERENCES token (id)[% UNLESS loop.last %],[% END %]
-[% END %]
-);
-TABLE
-        my $next_token = <<'TABLE';
+    id $serial,] .
+    do {
+        join "\n,", map { qq[token${_}_id INTEGER NOT NULL REFERENCES token (id)] } @orders
+    } .
+q[);];
+
+        my $next_token = qq[
 CREATE TABLE next_token (
-    id       [% SWITCH dbd %]
-                 [% CASE 'Pg'    %]SERIAL UNIQUE,
-                 [% CASE 'mysql' %]INTEGER PRIMARY KEY AUTO_INCREMENT,
-                 [% CASE DEFAULT %]INTEGER PRIMARY KEY AUTOINCREMENT,
-             [% END %]
+    id $serial,
     expr_id  INTEGER NOT NULL REFERENCES expr (id),
     token_id INTEGER NOT NULL REFERENCES token (id),
     count    INTEGER NOT NULL
-);
-TABLE
-        my $prev_token = <<'TABLE';
+);];
+        my $prev_token = qq[
 CREATE TABLE prev_token (
-    id       [% SWITCH dbd %]
-                 [% CASE 'Pg'    %]SERIAL UNIQUE,
-                 [% CASE 'mysql' %]INTEGER PRIMARY KEY AUTO_INCREMENT,
-                 [% CASE DEFAULT %]INTEGER PRIMARY KEY AUTOINCREMENT,
-             [% END %]
+    id $serial,
     expr_id  INTEGER NOT NULL REFERENCES expr (id),
     token_id INTEGER NOT NULL REFERENCES token (id),
     count    INTEGER NOT NULL
-);
-TABLE
-        my $indexes = <<'TABLE';
+);];
+        my $indexes = qq[
 CREATE INDEX token_text on token (text);
-[% FOREACH i IN orders %]
-    CREATE INDEX expr_token[% i %]_id on expr (token[% i %]_id);
-[% END %]
+] . do {
+    join "\n;", map { qq[CREATE INDEX expr_token${_}_id on expr (token${_}_id);] } @orders
+} . q[
 CREATE INDEX expr_token_ids on expr ([% columns %]);
 CREATE INDEX next_token_expr_id ON next_token (expr_id);
 CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
-TABLE
+];
     return (\$info, \$token, \$expr, \$next_token, \$prev_token, \$indexes);
 }
