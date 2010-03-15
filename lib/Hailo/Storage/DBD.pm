@@ -193,7 +193,7 @@ sub _get_create_db_sql {
     my ($self) = @_;
     my $sql;
 
-    my @create = $self->table_sql;
+    my @create = $self->_table_sql;
 
     for my $template (@create) {
         Template->new->process(
@@ -653,7 +653,7 @@ it under the same terms as Perl itself.
 
 =cut
 
-sub table_sql {
+sub _table_sql {
     my ($self) = @_;
 
     my $info = <<'TABLE';
