@@ -551,6 +551,9 @@ sub _pos_token {
     my ($self, $pos, $expr_id, $key_tokens) = @_;
     my $schema = $self->schema;
 
+    use Carp 'confess';
+    confess "oh noes expr_id not defined" unless defined $expr_id;
+
     # SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
     my @rs = $schema->resultset(ucfirst($pos).'Token')->search(
         { expr_id => $expr_id },
