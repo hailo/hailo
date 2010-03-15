@@ -11,7 +11,7 @@ my $dir = tempdir( "hailo-test-dbd-so-XXXX", CLEANUP => 1, TMPDIR => 1 );
 
 my ($fh, $brain_file) = tempfile( DIR => $dir, SUFFIX => '.sqlite' );
 
-my $trainfile = catfile(qw<t lib Hailo Test megahal.trn>);
+my $trainfile = catfile(qw<t lib Hailo Test starcraft.trn>);
 
 my $hailo = Hailo->new(
     storage_class  => 'SQLite',
