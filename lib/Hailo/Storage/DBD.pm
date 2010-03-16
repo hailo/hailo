@@ -11,7 +11,6 @@ use DBI;
 use List::Util qw<first shuffle>;
 use List::MoreUtils qw<uniq>;
 use namespace::clean -except => 'meta';
-use Data::Dump 'dump';
 
 has dbd => (
     isa           => Str,
