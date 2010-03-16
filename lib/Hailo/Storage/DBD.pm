@@ -291,9 +291,12 @@ sub make_reply {
             # SELECT spacing, text FROM token WHERE id = ?;
             my $token_info = $schema->resultset('Token')->find(
                 { id => $id },
-                { columns => [ qw/ spacing text / ] },
+                {
+                    columns => [ qw/ spacing text / ],
+                    result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+                },
             );
-            $token_cache{$id} = [ $token_info->spacing, $token_info->text ];
+            $token_cache{$id} = [ $token_info->{spacing}, $token_info->{text} ];
         }
         push @reply, $token_cache{$id};
     }
