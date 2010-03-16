@@ -394,7 +394,10 @@ sub _inc_link {
             expr_id  => $expr_id,
             token_id => $token_id,
         },
-        { columns => 'count' },
+        {
+            columns => 'count',
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+        },
     );
 
     given ($rs) {
