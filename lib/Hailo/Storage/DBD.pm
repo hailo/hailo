@@ -363,9 +363,12 @@ sub _find_rare_tokens {
         next if exists $links{$id};
         my $res = $schema->resultset('Token')->find(
             { id => $id },
-            { columns => [ 'count' ] },
+            {
+                columns => 'count',
+                result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+            },
         );
-        $links{$id} = $res->count;
+        $links{$id} = $res->{count};
     }
 
     # remove tokens which are too rare
@@ -400,7 +403,7 @@ sub _inc_link {
             $schema->resultset($type)->search(
                 \%cols, {}
             )->update({
-                count => \'count + 1'
+                count => \'count + 1',
             });
         }
         default {
@@ -426,7 +429,10 @@ sub _add_expr {
     }
 
     # INSERT INTO expr ([% columns %]) VALUES ([% ids %])
-    my $rs = $schema->resultset('Expr')->create(\%columns);
+    my $rs = $schema->resultset('Expr')->create(
+        \%columns,
+
+    );
 
     return $rs->id;
 }
@@ -446,10 +452,13 @@ sub _expr_id {
     # [% END %]
     my $res = $schema->resultset('Expr')->find(
         \%where,
-        { columns => 'id' },
+        {
+            columns => 'id',
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+        },
     );
     return unless $res;
-    return $res->id;
+    return $res->{id};
 }
 
 # return token id if the token exists
