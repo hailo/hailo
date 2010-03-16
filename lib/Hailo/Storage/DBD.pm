@@ -114,19 +114,25 @@ sub _engage {
         # SELECT text FROM info WHERE attribute = 'markov_order';
         my $res = $schema->resultset('Info')->find(
             { attribute => 'markov_order' },
-            { columns => [ 'text' ] },
+            {
+                columns => 'text',
+                result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+            },
         );
-        $self->order($res->text);
+        $self->order($res->{text});
 
         my $token_id = $schema->resultset('Token')->find(
             {
                 spacing => 0,
                 text    => '',
             },
-            { columns => [ 'id' ] },
+            {
+                columns => 'id',
+                result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+            },
         );
 
-        $self->_boundary_token_id($token_id->id);
+        $self->_boundary_token_id($token_id->{id});
 
     }
     else {
