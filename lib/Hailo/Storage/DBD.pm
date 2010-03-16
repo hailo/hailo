@@ -107,10 +107,6 @@ has _boundary_token_id => (
 sub _engage {
     my ($self) = @_;
 
-    for (0 .. $self->order - 1) {
-        Hailo::Storage::Schema::Result::Expr->add_tokenN_id($_);
-    }
-
     if ($self->_exists_db) {
         my $schema =  $self->schema;
 
@@ -187,7 +183,12 @@ sub stop_learning {
 
 sub _create_db {
     my ($self) = @_;
+
     chomp(my @statements = $self->_table_sql);
+
+    for (0 .. $self->order - 1) {
+        Hailo::Storage::Schema::Result::Expr->add_tokenN_id($_);
+    }
 
     for (@statements) {
         $self->dbh->do($_);

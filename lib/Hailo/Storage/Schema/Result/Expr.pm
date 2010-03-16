@@ -59,41 +59,26 @@ sub add_tokenN_id {
             size => undef,
         },
     );
+
+    __PACKAGE__->belongs_to(
+        "token${n}",
+        "Hailo::Storage::Schema::Result::Token",
+        { id => "token${n}_id" },
+        {},
+    );
 }
 
 __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 token0
+=head2 token*
 
 Type: belongs_to
 
 Related object: L<Hailo::Storage::Schema::Result::Token>
 
 =cut
-
-__PACKAGE__->belongs_to(
-  "token0",
-  "Hailo::Storage::Schema::Result::Token",
-  { id => "token0_id" },
-  {},
-);
-
-=head2 token1
-
-Type: belongs_to
-
-Related object: L<Hailo::Storage::Schema::Result::Token>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "token1",
-  "Hailo::Storage::Schema::Result::Token",
-  { id => "token1_id" },
-  {},
-);
 
 =head2 next_tokens
 
