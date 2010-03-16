@@ -11,6 +11,7 @@ use DBI;
 use List::Util qw<first shuffle>;
 use List::MoreUtils qw<uniq>;
 use namespace::clean -except => 'meta';
+use Data::Dump 'dump';
 
 has dbd => (
     isa           => Str,
@@ -459,10 +460,13 @@ sub _token_id {
             spacing => $token_info->[0],
             text    => $token_info->[1],
         },
-        { columns => [ 'id' ] },
+        {
+            columns => 'id',
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+        },
     );
     return if !defined $token_id;
-    return $token_id->id;
+    return $token_id->{id};
 }
 
 # get token id (adding the token if it doesn't exist)
@@ -536,11 +540,14 @@ sub _random_expr {
             # SELECT * FROM expr WHERE [% column %] = ? ORDER BY RANDOM() LIMIT 1;
             my $rs = $schema->resultset('Expr')->search(
                 { "token${pos}_id" => $token_id },
-                { columns => \@columns }
+                {
+                    columns => \@columns,
+                    result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+                }
             )->rand->single;
 
             # get a random expression which includes the token at this position
-            $expr = [ map { $rs->$_ } @columns ] if $rs;
+            $expr = [ map { $rs->{$_} } @columns ] if $rs;
             last if defined $expr;
         }
     }
@@ -560,17 +567,18 @@ sub _pos_token {
     # SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
     my @rs = $schema->resultset(ucfirst($pos).'Token')->search(
         { expr_id => $expr_id },
-        { columns => [ qw/ token_id count / ] },
+        {
+            columns => [ qw/ token_id count / ],
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+        },
     )->all();
 
-    # XXX: Can I make DBIx::Class do what fetchall_hashref('token_id')
-    # did automatically? DBIx::Class::ResultClass::HashRefInflator
-    # only does it on a per-row basis.
     my $pos_tokens = {};
     for my $row (@rs) {
-        $pos_tokens->{ $row->token_id } = {
-            token_id => $row->token_id,
-            count    => $row->count,
+        my $id = $row->{token_id};
+        $pos_tokens->{ $id } = {
+            token_id => $id,
+            count    => $row->{count},
         };
     }
 
