@@ -333,7 +333,6 @@ sub learn_tokens {
                 # UPDATE token SET count = count + 1 WHERE id = ?;
                 $schema->resultset("Token")->search(
                     { id => $_ },
-                    undef
                 )->update({
                     count => \'count + 1'
                 });
@@ -413,7 +412,8 @@ sub _inc_link {
         when (defined) {
             # UPDATE [% table %] SET count = count + 1 WHERE expr_id = ? AND token_id = ?
             $schema->resultset($type)->search(
-                \%cols, {}
+                \%cols,
+                { result_class => 'DBIx::Class::ResultClass::HashRefInflator' }
             )->update({
                 count => \'count + 1',
             });
