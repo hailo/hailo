@@ -325,7 +325,10 @@ sub learn_tokens {
 
             for (uniq(@expr)) {
                 # UPDATE token SET count = count + 1 WHERE id = ?;
-                $schema->resultset("Token")->search( { id => $_ }, undef )->update({
+                $schema->resultset("Token")->search(
+                    { id => $_ },
+                    undef
+                )->update({
                     count => \'count + 1'
                 });
             }
@@ -434,7 +437,6 @@ sub _add_expr {
     # INSERT INTO expr ([% columns %]) VALUES ([% ids %])
     my $rs = $schema->resultset('Expr')->create(
         \%columns,
-
     );
 
     return $rs->id;
@@ -578,9 +580,6 @@ sub _random_expr {
 sub _pos_token {
     my ($self, $pos, $expr_id, $key_tokens) = @_;
     my $schema = $self->schema;
-
-    use Carp 'confess';
-    confess "oh noes expr_id not defined" unless defined $expr_id;
 
     # SELECT token_id, count FROM [% table %] WHERE expr_id = ?;
     my @rs = $schema->resultset(ucfirst($pos).'Token')->search(
