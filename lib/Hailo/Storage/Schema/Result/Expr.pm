@@ -68,6 +68,12 @@ sub add_tokenN_id {
     );
 }
 
+if (my $n = $ENV{HAILO_STORAGE_SCHEMA_RESULT_EXPR_TOKENN_ORDERS}) {
+    # Work around add_tokenN_id() not working properly after the class
+    # has been loaded once.
+    add_tokenN_id(undef, $_) for 0 .. $n;
+}
+
 __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS

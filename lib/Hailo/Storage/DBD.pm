@@ -8,7 +8,6 @@ BEGIN {
     MooseX::StrictConstructor->import;
 }
 use DBI;
-use Hailo::Storage::Schema;
 use List::Util qw<first shuffle>;
 use List::MoreUtils qw<uniq>;
 use namespace::clean -except => 'meta';
@@ -58,6 +57,7 @@ has schema => (
 sub _build_schema {
     my ($self) = @_;
 
+    require Hailo::Storage::Schema;
     my $schema = Hailo::Storage::Schema->connect(
         sub { $self->dbh },
         # See http://search.cpan.org/~ribasushi/DBIx-Class-0.08120/lib/DBIx/Class/Storage/DBI.pm#DBIx::Class_specific_connection_attributes
@@ -184,15 +184,9 @@ sub stop_learning {
 sub _create_db {
     my ($self) = @_;
 
-    chomp(my @statements = $self->_table_sql);
-
-    for (0 .. $self->order - 1) {
-        Hailo::Storage::Schema::Result::Expr->add_tokenN_id($_);
-    }
-
-    for (@statements) {
-        $self->dbh->do($_);
-    }
+    $ENV{HAILO_STORAGE_SCHEMA_RESULT_EXPR_TOKENN_ORDERS} = $self->order - 1;
+    require Hailo::Storage::Schema;
+    $self->schema->deploy;
 
     return;
 }
@@ -642,74 +636,3 @@ This program is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
-sub _table_sql {
-    my ($self) = @_;
-    my $dbd = $self->dbd;
-    my @orders = (0 .. $self->order-1);
-    my $columns = join(', ', map { "token${_}_id" } @orders);
-
-    my $serial = do {
-        my $txt;
-        given ($dbd) {
-            when ('Pg')    { $txt = 'SERIAL UNIQUE' }
-            when ('mysql') { $txt = 'INTEGER PRIMARY KEY AUTO_INCREMENT' }
-            default        { $txt = 'INTEGER PRIMARY KEY AUTOINCREMENT' }
-        }
-        $txt;
-    };
-
-    my $info = q[
-CREATE TABLE info (
-    attribute ] . do {
-        my $txt;
-        given ($dbd) {
-            when ('mysql') { $txt = 'TEXT NOT NULL,' }
-            default        { $txt = 'TEXT NOT NULL PRIMARY KEY,' }
-        }
-        $txt;
-    } . q[
-    text      TEXT NOT NULL
-);];
-    my $token = qq[
-CREATE TABLE token (
-    id $serial,
-    spacing INTEGER NOT NULL,
-    text ] . do { ($dbd eq 'mysql' ? ' VARCHAR(255) ' : ' TEXT ' ) . ' NOT NULL, ' } . q[
-    count INTEGER NOT NULL
-);
-];
-        my $expr = qq[
-CREATE TABLE expr (
-    id $serial,] .
-    do {
-        join(",", map { qq[\n    token${_}_id INTEGER NOT NULL REFERENCES token (id)] } @orders)
-    } .
-q[
-);];
-
-        my $next_token = qq[
-CREATE TABLE next_token (
-    id $serial,
-    expr_id  INTEGER NOT NULL REFERENCES expr (id),
-    token_id INTEGER NOT NULL REFERENCES token (id),
-    count    INTEGER NOT NULL
-);];
-        my $prev_token = qq[
-CREATE TABLE prev_token (
-    id $serial,
-    expr_id  INTEGER NOT NULL REFERENCES expr (id),
-    token_id INTEGER NOT NULL REFERENCES token (id),
-    count    INTEGER NOT NULL
-);];
-        my $indexes = qq[CREATE INDEX token_text on token (text);] .
-do {
-    join "", map { qq[CREATE INDEX expr_token${_}_id on expr (token${_}_id);] } @orders
-} . 
-qq[CREATE INDEX expr_token_ids on expr ($columns);
-CREATE INDEX next_token_expr_id ON next_token (expr_id);
-CREATE INDEX prev_token_expr_id ON prev_token (expr_id);
-];
-    my $sql = $info . $token . $expr . $next_token . $prev_token . $indexes;
-    return ($sql =~ /\s*(.*?)\s*;\s*/gs);
-}
