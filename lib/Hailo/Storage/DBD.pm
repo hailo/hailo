@@ -229,7 +229,7 @@ sub make_reply {
         my $text = $token_info->[1];
         my $info = $self->_token_similar($text);
         next if !defined $info;
-        my ($id, $spacing) = ($info->id, $info->spacing);
+        my ($id, $spacing) = ($info->{id}, $info->{spacing});
         next if !defined $id;
         push @key_ids, $id;
         next if exists $token_cache{$id};
@@ -498,7 +498,10 @@ sub _token_similar {
     # SELECT id, spacing FROM token WHERE text = ? ORDER BY RANDOM() LIMIT 1
     return $schema->resultset('Token')->search(
         { text => $token_text },
-        { columns => [ qw/id spacing/ ] }
+        {
+            columns => [ qw/id spacing/ ],
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+        }
     )->rand->single;
 }
 
