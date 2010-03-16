@@ -440,9 +440,7 @@ sub _add_expr {
     }
 
     # INSERT INTO expr ([% columns %]) VALUES ([% ids %])
-    my $rs = $schema->resultset('Expr')->create(
-        \%columns,
-    );
+    my $rs = $schema->resultset('Expr')->create(\%columns);
 
     return $rs->id;
 }
