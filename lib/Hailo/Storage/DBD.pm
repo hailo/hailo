@@ -121,8 +121,16 @@ sub _engage {
         );
         $self->order($res->text);
 
-        my $token_id = $self->_add_token([0, '']);
-        $self->_boundary_token_id($token_id);
+        my $token_id = $schema->resultset('Token')->find(
+            {
+                spacing => 0,
+                text    => '',
+            },
+            { columns => [ 'id' ] },
+        );
+
+        $self->_boundary_token_id($token_id->id);
+
     }
     else {
         $self->_create_db();
