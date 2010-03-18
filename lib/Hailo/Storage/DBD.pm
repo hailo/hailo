@@ -208,7 +208,8 @@ sub _engage {
 
         $self->sth->{add_token}->execute(0, '');
         $self->sth->{last_token_rowid}->execute();
-        my $id = $self->sth->{last_token_rowid}->fetchrow_array();
+        $self->sth->{last_token_rowid}->bind_columns(\my $id);
+        $self->sth->{last_token_rowid}->fetch;
         $self->_boundary_token_id($id);
     }
 
@@ -378,10 +379,14 @@ sub make_reply {
 
     # translate token ids to token spacing/text
     my @reply;
+
     for my $id (@token_ids) {
         if (!exists $token_cache{$id}) {
+            my ($spacing, $text);
             $self->sth->{token_info}->execute($id);
-            $token_cache{$id} = [$self->sth->{token_info}->fetchrow_array];
+            $self->sth->{token_info}->bind_columns(\$spacing, \$text);
+            $self->sth->{token_info}->fetch;
+            $token_cache{$id} = [$spacing, $text];
         }
         push @reply, $token_cache{$id};
     }
@@ -516,9 +521,12 @@ sub _token_similar {
 # add a new token and return its id
 sub _add_token {
     my ($self, $token_info) = @_;
+
     $self->sth->{add_token}->execute(@$token_info);
     $self->sth->{last_token_rowid}->execute();
-    return $self->sth->{last_token_rowid}->fetchrow_array;
+    $self->sth->{last_token_rowid}->bind_columns(\my $id);
+    $self->sth->{last_token_rowid}->fetch;
+    return $id;
 }
 
 # return a random expression containing the given token
