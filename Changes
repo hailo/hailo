@@ -2,6 +2,9 @@ Revision history for Hailo
 
 {{$NEXT}}
 
+    - Remove unused script that used Class::MOP to close RT #91029
+      ("New Moose may break your code")
+
 0.70 2011-09-18 19:15:17
 
     - When using --train-fast, remove the "flushing cache" message when done
