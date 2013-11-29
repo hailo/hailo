@@ -1,6 +1,7 @@
 Revision history for Hailo
 
 {{$NEXT}}
+    - Bump README.pod with new content from lib/Hailo.pm's POD.
 
     - Remove unused script that used Class::MOP to close RT #91029
       ("New Moose may break your code")
