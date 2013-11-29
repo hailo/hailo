@@ -1,6 +1,10 @@
 Revision history for Hailo
 
 {{$NEXT}}
+
+    - Super minor release, just docs and nuking an old developer
+      script that wasn't even in the CPAN tarball.
+
     - Bump README.pod with new content from lib/Hailo.pm's POD.
 
     - Remove unused script that used Class::MOP to close RT #91029
