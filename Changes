@@ -2,6 +2,8 @@ Revision history for Hailo
 
 {{$NEXT}}
 
+0.71 2013-11-29 00:40:38
+
     - Super minor release, just docs and nuking an old developer
       script that wasn't even in the CPAN tarball.
 
