@@ -38,33 +38,26 @@ sub run {
     while (defined (my $line = $term->readline($name . '> '))) {
         $line = decode('utf8', $line);
 
-        given ($line) {
-            when (/$command/p) {
-                when ($+{method} eq 'help') {
-                    print $self->_help($hailo);
-                }
-                when ($+{method} ~~ [ qw< quit exit >]) {
-                    say $hailo->reply("Dave, this conversation can serve no purpose anymore. Goodbye.") // "Bye!";
-                    exit 0;
-                }
-                default {
-                    my $meth = $+{method};
-                    my @args = defined $+{arguments} ? eval $+{arguments} : ();
+        if ($line =~ /$command/p) {
+            if ($+{method} eq 'help') {
+                print $self->_help($hailo);
+            } elsif ($+{method} =~ /^(?: quit | exit )$/xs) {
+                say $hailo->reply("Dave, this conversation can serve no purpose anymore. Goodbye.") // "Bye!";
+                exit 0;
+            }
+            my $meth = $+{method};
+            my @args = defined $+{arguments} ? eval $+{arguments} : ();
 
-                    local ($@, $!);
-                    eval {
-                        say dump $hailo->$meth(@args);
-                    };
-                    if (my $err = $@) {
-                        chomp $err;
-                        say STDERR "Failed on <<${^MATCH}>>: <<$err>>";
-                    }
-                }
+            eval {
+                say dump $hailo->$meth(@args);
+                1;
+            } or do {
+                chomp(my $err = $@ || "Zombie Error");
+                say STDERR "Failed on <<${^MATCH}>>: <<$err>>";
             }
-            default {
-                my $answer = $hailo->learn_reply($line);
-                say $answer // "I don't know enough to answer you yet.";
-            }
+        } else {
+            my $answer = $hailo->learn_reply($line);
+            say $answer // "I don't know enough to answer you yet.";
         }
     }
     print "\n";
@@ -86,7 +79,7 @@ INTRO
 sub _help {
     my ($self, $hailo) = @_;
 
-    my $include = qr/ ^ _go /x;
+    my $include = qr/ ^ _go /xs;
     my $exclude = qr/
         _
        (?:
@@ -99,15 +92,15 @@ sub _help {
          | brain
          | class
        )
-    $/x;
+    $/xs;
 
     my @attr;
     for my $attr ($hailo->meta->get_all_attributes) {
         # Only get attributes that are valid command-line options
-        next unless $attr->name ~~ $include;
+        next unless $attr->name =~ $include;
 
         # We don't support changing these in mid-stream
-        next if $attr->name ~~ $exclude;
+        next if $attr->name =~ $exclude;
 
         push @attr => {
             name => do {

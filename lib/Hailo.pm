@@ -106,7 +106,7 @@ for my $k (keys %has) {
         isa           => 'Str',
         is            => "rw",
         default       => $default,
-        ($k ~~ 'tokenizer'
+        ($k eq 'tokenizer'
          ? (trigger => sub {
              my ($self, $class) = @_;
              $self->_custom_tokenizer_class(1);
@@ -140,13 +140,13 @@ for my $k (keys %has) {
             $self->$method_class,
             {
                 arguments => $self->$method_args,
-                ($k ~~ [ qw< engine storage > ]
+                ($k =~ /^(?:engine|storage)$/s
                  ? (order     => $self->order)
                  : ()),
-                ($k ~~ [ qw< engine > ]
+                ($k eq 'engine'
                  ? (storage   => $self->_storage)
                  : ()),
-                (($k ~~ [ qw< storage > ] and defined $self->brain)
+                (($k eq 'storage' and defined $self->brain)
                  ? (
                      hailo => do {
                          require Scalar::Util;
@@ -171,9 +171,9 @@ for my $k (keys %has) {
                      brain => $self->brain
                  )
                  : ()),
-                (($k ~~ [ qw< storage > ]
+                ($k eq 'storage'
                   ? (tokenizer_class => $self->tokenizer_class)
-                  : ()))
+                  : ())
             },
         );
 
@@ -218,33 +218,27 @@ sub train {
 
     $self->_storage->start_training();
 
-    given ($input) {
+    if (not ref $input and defined $input and $input eq '-') {
         # With STDIN
-        when (not ref and defined and $_ eq '-') {
-            die "You must provide STDIN when training from '-'" if $self->_is_interactive(*STDIN);
-            $self->_train_fh(*STDIN, $fast);
-        }
+        die "You must provide STDIN when training from '-'" if $self->_is_interactive(*STDIN);
+        $self->_train_fh(*STDIN, $fast);
+    } elsif (ref $input eq 'GLOB') {
         # With a filehandle
-        when (ref eq 'GLOB') {
-            $self->_train_fh($input, $fast);
-        }
+        $self->_train_fh($input, $fast);
+    } elsif (not ref $input) {
         # With a file
-        when (not ref) {
-            open my $fh, '<:encoding(utf8)', $input;
-            $self->_train_fh($fh, $fast, $input);
-        }
+        open my $fh, '<:encoding(utf8)', $input;
+        $self->_train_fh($fh, $fast, $input);
+    } elsif (ref $input eq 'ARRAY') {
         # With an Array
-        when (ref eq 'ARRAY') {
-            for my $line (@$input) {
-                $self->_learn_one($line, $fast);
-                $self->_engine->flush_cache if !$fast;
-            }
-            $self->_engine->flush_cache if $fast;
+        for my $line (@$input) {
+            $self->_learn_one($line, $fast);
+            $self->_engine->flush_cache if !$fast;
         }
+        $self->_engine->flush_cache if $fast;
+    } else {
         # With something naughty
-        default {
-            die "Unknown input: $input";
-        }
+        die "Unknown input: $input";
     }
 
     $self->_storage->stop_training();
@@ -269,20 +263,14 @@ sub learn {
     my ($self, $input) = @_;
     my $inputs;
 
-    given ($input) {
-        when (not defined) {
-            die "Cannot learn from undef input";
-        }
-        when (not ref) {
-            $inputs = [$input];            
-        }
-        # With an Array
-        when (ref eq 'ARRAY') {
-            $inputs = $input
-        }
-        default {
-            die "Unknown input: $input";
-        }
+    if (not defined $input) {
+        die "Cannot learn from undef input";
+    } elsif (not ref $input) {
+        $inputs = [$input];
+    } elsif (ref $input eq 'ARRAY') {
+        $inputs = $input; # With an Array
+    } else {
+        die "Unknown input: $input";
     }
 
     my $storage = $self->_storage;

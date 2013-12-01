@@ -136,14 +136,12 @@ sub sth {
     }
 
     # DBD specific queries / optimizations / munging
-    given ($dbd) {
-        when ('SQLite') {
-            # Optimize these for SQLite
-            $state{expr_total}       = qq[SELECT seq FROM sqlite_sequence WHERE name = 'expr';];
-            $state{token_total}      = qq[SELECT seq FROM sqlite_sequence WHERE name = 'token';];
-            $state{prev_total}       = qq[SELECT seq FROM sqlite_sequence WHERE name = 'prev_token';];
-            $state{next_total}       = qq[SELECT seq FROM sqlite_sequence WHERE name = 'next_token';];
-        }
+    if ($dbd eq 'SQLite') {
+        # Optimize these for SQLite
+        $state{expr_total}       = qq[SELECT seq FROM sqlite_sequence WHERE name = 'expr';];
+        $state{token_total}      = qq[SELECT seq FROM sqlite_sequence WHERE name = 'token';];
+        $state{prev_total}       = qq[SELECT seq FROM sqlite_sequence WHERE name = 'prev_token';];
+        $state{next_total}       = qq[SELECT seq FROM sqlite_sequence WHERE name = 'next_token';];
     }
 
     # Sort to make error output easier to read if this fails. The

@@ -2,6 +2,17 @@ Revision history for Hailo
 
 {{$NEXT}}
 
+    - Our tests have been broken on perl 5.19.* (soon to become
+      5.20.*) for a while because of the new warnings about given/when
+      being experimental, which would fail one of the tests where we
+      weren't expecting extra output when testing our command-line
+      invocation.
+
+      But the whole use of given/when and ~~ in the codebase was just
+      a stupid youthful indiscretion, those features of perl suck,
+      this release kills all uses of them with fire in favor of just
+      using if/elsif and =~, which is all we used them for anyway.
+
 0.71 2013-11-29 00:40:38
 
     - Super minor release, just docs and nuking an old developer

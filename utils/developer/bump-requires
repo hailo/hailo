@@ -27,7 +27,7 @@ while (<>) {
 
     $seen_prereq = 1 if /^\[Prereq/;
 
-    if ($seen_prereq and $_ ~~ $module_get) {
+    if ($seen_prereq and $_ =~ $module_get) {
         my $in_core = Module::CoreList->first_release($+{mod});
         if (not $in_core
             and $+{vers} ne '0'

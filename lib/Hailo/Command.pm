@@ -415,7 +415,7 @@ USAGE
 
     # Hack: We can't get at our object from here so we have to inspect
     # @ARGV directly.
-    say "\n", $synopsis if "@ARGV" ~~ /--examples/;
+    say "\n", $synopsis if "@ARGV" =~ /--examples/;
 
     exit 1;
 }

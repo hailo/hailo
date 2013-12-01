@@ -74,20 +74,18 @@ for my $save_on_exit (0, 1) {
         };
         my $after_save_size = -s $brain_file;
 
-        given ($save_on_exit) {
-            when (0) {
-                cmp_ok($after_train_size, "==", $after_save_size, "Hailo wasn't saved to disk, was $after_train_size, now $after_save_size");
-                my $hailo = $get_hailo->();
-                my $r = $hailo->reply("moo-$save_on_exit-You");
-                unlike($r, qr/moo-$save_on_exit-You/i, "got a reply to a word that now exist: $r");
-            }
-            when (1) {
-                cmp_ok($after_train_size, "<", $after_save_size, "Hailo was saved to disk, was $after_train_size, now $after_save_size");
-                my $hailo = $get_hailo->();
-                my $r = $hailo->reply("moo-$save_on_exit-You");
-                like($r, qr/moo-$save_on_exit-You/i, "got a reply to a word that now exist: $r");
-            }
-            default { die }
+        if ($save_on_exit == 0) {
+            cmp_ok($after_train_size, "==", $after_save_size, "Hailo wasn't saved to disk, was $after_train_size, now $after_save_size");
+            my $hailo = $get_hailo->();
+            my $r = $hailo->reply("moo-$save_on_exit-You");
+            unlike($r, qr/moo-$save_on_exit-You/i, "got a reply to a word that now exist: $r");
+        } elsif ($save_on_exit == 1) {
+            cmp_ok($after_train_size, "<", $after_save_size, "Hailo was saved to disk, was $after_train_size, now $after_save_size");
+            my $hailo = $get_hailo->();
+            my $r = $hailo->reply("moo-$save_on_exit-You");
+            like($r, qr/moo-$save_on_exit-You/i, "got a reply to a word that now exist: $r");
+        } else {
+            die "PANIC: Unknown '$save_on_exit' value";
         }
     }
 }
