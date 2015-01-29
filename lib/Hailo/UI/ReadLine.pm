@@ -1,8 +1,8 @@
 package Hailo::UI::ReadLine;
 
 use 5.010;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moo;
+use MooX::StrictConstructor;
 use Encode 'decode';
 use Hailo;
 use Term::ReadLine;
@@ -152,7 +152,7 @@ HELP
     return $help;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

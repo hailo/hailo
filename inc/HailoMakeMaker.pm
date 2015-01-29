@@ -1,11 +1,11 @@
 package inc::HailoMakeMaker;
-use Moose;
+use Moo;
 
 extends 'Dist::Zilla::Plugin::MakeMaker::Awesome';
 
-override _build_MakeFile_PL_template => sub {
-    my ($self) = @_;
-    my $template = super();
+around _build_MakeFile_PL_template => sub {
+    my ($orig, $self) = @_;
+    my $template = $self->$orig();
 
     $template .= <<'TEMPLATE';
 package MY;
@@ -27,4 +27,4 @@ TEMPLATE
     return $template;
 };
 
-__PACKAGE__->meta->make_immutable;
+1;

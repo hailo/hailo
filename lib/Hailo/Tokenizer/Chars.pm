@@ -1,8 +1,8 @@
 package Hailo::Tokenizer::Chars;
 
 use 5.010;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moo;
+use MooX::StrictConstructor;
 use namespace::clean -except => 'meta';
 
 with qw(Hailo::Role::Arguments
@@ -29,7 +29,7 @@ sub trim {
     return $txt;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

@@ -1,7 +1,7 @@
 package Hailo::Engine::Scored;
 
 use 5.010;
-use Any::Moose;
+use Moo;
 use List::Util qw<sum>;
 use List::MoreUtils qw<any>;
 use Time::HiRes qw<gettimeofday tv_interval>;
@@ -224,7 +224,7 @@ sub _too_similar {
     return 1;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

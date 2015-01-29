@@ -1,8 +1,8 @@
 package Hailo::Storage::MySQL;
 
 use 5.010;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moo;
+use MooX::StrictConstructor;
 use List::MoreUtils qw< all >;
 use namespace::clean -except => 'meta';
 
@@ -11,9 +11,10 @@ with qw(Hailo::Role::Arguments Hailo::Role::Storage);
 
 sub _build_dbd { return 'mysql' };
 
-override _build_dbd_options => sub {
+around _build_dbd_options => sub {
+    my ($orig, $self) = @_;
     return {
-        %{ super() },
+        %{ $self->$orig() },
         mysql_enable_utf8 => 1,
     };
 };
@@ -45,7 +46,7 @@ sub ready {
     return all { exists $self->arguments->{$_} } qw(database username password);
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

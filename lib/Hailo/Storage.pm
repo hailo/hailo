@@ -1,22 +1,25 @@
 package Hailo::Storage;
 
 use 5.010;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moo;
+use MooX::StrictConstructor;
+use Types::Standard qw(ArrayRef Bool HashRef InstanceOf Int Str);
 use DBI;
 use Hailo::Storage::Schema;
 
 has dbd => (
-    isa           => 'Str',
-    is            => 'ro',
-    lazy_build    => 1,
+    isa           => Str,
+    is            => 'lazy',
+    predicate     => 1,
+    clearer       => 1,
     documentation => "The DBD::* driver we're using",
 );
 
 has dbd_options => (
-    isa           => 'HashRef',
-    is            => 'ro',
-    lazy_build    => 1,
+    isa           => HashRef,
+    is            => 'lazy',
+    predicate     => 1,
+    clearer       => 1,
     documentation => 'Options passed as the last argument to DBI->connect()',
 );
 
@@ -28,9 +31,10 @@ sub _build_dbd_options {
 }
 
 has dbh => (
-    isa           => 'DBI::db',
-    is            => 'ro',
-    lazy_build    => 1,
+    isa           => InstanceOf['DBI::db'],
+    is            => 'lazy',
+    predicate     => 1,
+    clearer       => 1,
     documentation => 'Our DBD object',
 );
 
@@ -42,12 +46,18 @@ sub _build_dbh {
 };
 
 has dbi_options => (
-    isa           => 'ArrayRef',
-    is            => 'ro',
-    auto_deref    => 1,
-    lazy_build    => 1,
+    isa           => ArrayRef,
+    is            => 'lazy',
+    predicate     => 1,
+    clearer       => 1,
     documentation => 'Options passed to DBI->connect()',
 );
+
+around dbi_options => sub {
+    my ($orig, $self, @args) = @_;
+    my $return = $self->$orig(@args);
+    return wantarray ? @{$return} : $return;
+};
 
 sub _build_dbi_options {
     my ($self) = @_;
@@ -66,16 +76,17 @@ sub _build_dbi_options {
 }
 
 has _engaged => (
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'rw',
     default       => 0,
     documentation => 'Have we done setup work to get this database going?',
 );
 
 has sth => (
-    isa        => 'HashRef',
-    is         => 'ro',
-    lazy_build => 1,
+    isa           => HashRef,
+    is            => 'lazy',
+    predicate     => 1,
+    clearer       => 1,
     documentation => 'A HashRef of prepared DBI statement handles',
 );
 
@@ -85,7 +96,7 @@ sub _build_sth {
 }
 
 has _boundary_token_id => (
-    isa => 'Int',
+    isa => Int,
     is  => 'rw',
 );
 
@@ -262,7 +273,7 @@ sub totals {
     return $token, $expr, $prev, $next;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 
@@ -283,9 +294,10 @@ passed to L<DBI|DBI>.
 
 Subclasses can override this method to add options of their own. E.g:
 
-    override _build_dbd_options => sub {
+    around _build_dbd_options => sub {
+        my ($orig, $self) = @_;
         return {
-            %{ super() },
+            %{ $self->$orig() },
             sqlite_unicode => 1,
         };
     };

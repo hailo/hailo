@@ -3,13 +3,10 @@ package hailo;
 use 5.010;
 use open qw< :encoding(utf8) :std >;
 use Dir::Self;
-use Any::Moose;
+use Moo;
 use Encode qw(decode);
 use Hailo::Command;
 use namespace::clean -except => 'meta';
-
-# Nothing to see here
-__PACKAGE__->meta->make_immutable;
 
 # use utf8 everywhere
 $_ = decode('utf8', $_) for @ARGV;

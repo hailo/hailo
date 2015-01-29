@@ -1,7 +1,8 @@
 package Hailo::Test;
 use 5.010;
 use autodie;
-use Any::Moose;
+use Moo;
+use Types::Standard qw(Bool InstanceOf Str);
 use Class::Load qw(try_load_class);
 use Hailo;
 use Test::More;
@@ -31,27 +32,28 @@ sub exhaustive_tests {
 }
 
 has brief => (
-    is => 'ro',
-    isa => 'Bool',
+    isa     => Bool,
+    is      => 'ro',
     default => 0,
 );
 
 has in_memory => (
-    is => 'ro',
-    isa => 'Bool',
+    isa     => Bool,
+    is      => 'ro',
     default => 1,
 );
 
 has exhaustive => (
-    is => 'ro',
-    isa => 'Bool',
+    isa     => Bool,
+    is      => 'ro',
     default => 0,
 );
 
 has tmpdir => (
-    is => 'ro',
-    isa => 'Str',
-    lazy_build => 1,
+    isa       => Str,
+    is        => 'lazy',
+    predicate => 1,
+    clearer   => 1,
 );
 
 sub _build_tmpdir {
@@ -67,13 +69,15 @@ sub _build_tmpdir {
 }
 
 has brain => (
-    is => 'ro',
-    isa => 'Str',
+    isa => Str,
+    is  => 'ro',
 );
 
 has tmpfile => (
-    is => 'ro',
-    lazy_build => 1,
+    isa       => Str,
+    is        => 'lazy',
+    predicate => 1,
+    clearer   => 1,
 );
 
 sub _build_tmpfile {
@@ -89,9 +93,10 @@ sub _build_tmpfile {
 }
 
 has hailo => (
-    is => 'ro',
-    isa => "Hailo",
-    lazy_build => 1,
+    isa       => InstanceOf['Hailo'],
+    is        => 'lazy',
+    predicate => 1,
+    clearer   => 1,
 );
 
 sub _build_hailo {
@@ -220,8 +225,8 @@ sub _connect_opts {
 }
 
 has storage => (
-    is => 'ro',
-    isa => 'Str',
+    isa => Str,
+    is  => 'ro',
 );
 
 sub train_file {
@@ -545,4 +550,4 @@ sub DEMOLISH {
     $self->unspawn_storage();
 }
 
-__PACKAGE__->meta->make_immutable;
+1;

@@ -1,8 +1,8 @@
 package Hailo::Storage::SQLite;
 
 use 5.010;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moo;
+use MooX::StrictConstructor;
 use namespace::clean -except => 'meta';
 
 extends 'Hailo::Storage';
@@ -10,9 +10,10 @@ with qw(Hailo::Role::Arguments Hailo::Role::Storage);
 
 sub _build_dbd { return 'SQLite' };
 
-override _build_dbd_options => sub {
+around _build_dbd_options => sub {
+    my ($orig, $self) = @_;
     return {
-        %{ super() },
+        %{ $self->$orig() },
         sqlite_unicode => 1,
     };
 };
@@ -72,13 +73,13 @@ after stop_training => sub {
     return;
 };
 
-override initialized => sub {
-    my ($self) = @_;
+around initialized => sub {
+    my ($orig, $self) = @_;
 
     my $brain = $self->brain;
     return unless defined $brain;
     return if $brain eq ':memory:';
-    return -e $brain && super();
+    return -e $brain && $self->$orig();
 };
 
 sub ready {
@@ -124,7 +125,7 @@ sub save {
     return;
 };
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

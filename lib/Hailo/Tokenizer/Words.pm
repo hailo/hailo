@@ -2,8 +2,8 @@ package Hailo::Tokenizer::Words;
 
 use 5.010;
 use utf8;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moo;
+use MooX::StrictConstructor;
 use Regexp::Common qw/ URI /;
 use namespace::clean -except => 'meta';
 
@@ -208,7 +208,7 @@ sub make_output {
     return $reply;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

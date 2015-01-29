@@ -1,7 +1,7 @@
 package Hailo::Role::UI;
 
 use 5.010;
-use Any::Moose '::Role';
+use Moo::Role;
 use namespace::clean -except => 'meta';
 
 requires 'run';

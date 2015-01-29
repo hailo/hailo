@@ -1,14 +1,15 @@
 package Hailo::Engine::Default;
 
 use 5.010;
-use Any::Moose;
+use Moo;
+use Types::Standard qw(Int);
 use List::Util qw<min first shuffle>;
 use List::MoreUtils qw<uniq>;
 
 with qw[ Hailo::Role::Arguments Hailo::Role::Engine ];
 
 has repeat_limit => (
-    isa     => 'Int',
+    isa     => Int,
     is      => 'rw',
     lazy    => 1,
     default => sub {
@@ -418,7 +419,7 @@ sub _construct_reply {
     return;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
 
 =encoding utf8
 

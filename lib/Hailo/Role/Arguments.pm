@@ -1,15 +1,21 @@
 package Hailo::Role::Arguments;
 
 use 5.010;
-use Any::Moose '::Role';
+use Moo::Role;
+use Types::Standard qw(HashRef Str);
 use namespace::clean -except => 'meta';
 
 has arguments => (
-    isa           => 'HashRef[Str]',
+    isa           => HashRef[Str],
     is            => 'ro',
     documentation => "Arguments passed from Hailo",
-    auto_deref    => 1,
 );
+
+around arguments => sub {
+    my ($orig, $self, @args) = @_;
+    my $return = $self->$orig(@args);
+    return wantarray ? @{$return} : $return;
+};
 
 1;
 
@@ -39,4 +45,3 @@ This program is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
