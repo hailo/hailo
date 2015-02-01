@@ -2,7 +2,7 @@ package Hailo::Test;
 use 5.010;
 use autodie;
 use Moo;
-use Types::Standard qw(Bool InstanceOf Str);
+use Types::Standard qw(ArrayRef Bool InstanceOf Str);
 use Class::Load qw(try_load_class);
 use Hailo;
 use Test::More;
@@ -74,7 +74,7 @@ has brain => (
 );
 
 has tmpfile => (
-    isa       => Str,
+    isa       => ArrayRef,
     is        => 'lazy',
     predicate => 1,
     clearer   => 1,
