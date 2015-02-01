@@ -13,7 +13,7 @@ use File::Temp qw(tempfile tempdir);
 use File::CountLines qw(count_lines);
 use Hailo::Tokenizer::Words;
 use Bot::Training;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 sub all_storages {
     return qw(SQLite PostgreSQL MySQL);

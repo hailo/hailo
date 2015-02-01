@@ -1,6 +1,5 @@
 use 5.010;
 use autodie;
-use Any::Moose;
 use List::MoreUtils qw(uniq);
 use Test::More tests => 22;
 use Test::Exception;

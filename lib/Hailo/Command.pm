@@ -2,11 +2,10 @@ package Hailo::Command;
 
 use 5.010;
 use Moo;
-# TODO: Translate usage from MouseX::Getopt to MooX::Options!
 use MooX::Options;
 use MooX::StrictConstructor;
 use Types::Standard qw(Bool Int Str);
-use namespace::clean -except => 'meta';
+use namespace::clean -except => [qw(new _options_data _options_config)];
 
 extends 'Hailo';
 

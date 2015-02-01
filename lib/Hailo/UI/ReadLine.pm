@@ -7,7 +7,7 @@ use Encode 'decode';
 use Hailo;
 use Term::ReadLine;
 use Data::Dump 'dump';
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 with qw(Hailo::Role::Arguments
         Hailo::Role::UI);

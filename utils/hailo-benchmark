@@ -1,12 +1,11 @@
 #!/usr/bin/env perl
 use 5.010;
 use lib 't/lib';
-use Any::Moose;
 use Hailo::Test;
 use Benchmark qw(:all);
 use File::Temp qw(tempfile tempdir);
 use Test::More;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 # Notes:
 #   for i in $(echo 'show databases;' | mysql -u root -proot | grep hailo-test); do echo "drop database $i;" | mysql -u root -proot; done

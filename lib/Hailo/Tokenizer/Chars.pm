@@ -3,7 +3,7 @@ package Hailo::Tokenizer::Chars;
 use 5.010;
 use Moo;
 use MooX::StrictConstructor;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 with qw(Hailo::Role::Arguments
         Hailo::Role::Tokenizer);

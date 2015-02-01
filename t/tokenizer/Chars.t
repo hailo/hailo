@@ -31,9 +31,9 @@ subtest make_tokens => sub {
     my @random_chars = map { $chr[rand @chr] } 1 .. 30;
     my @wrd = qw<
                     Hailo is a fast and lightweight markov engine
-                    intended to replace AI::MegaHAL. It has a Mouse
-                    (or Moose) based core with pluggable storage and
-                    tokenizer backends.
+                    intended to replace AI::MegaHAL. It has a Moo
+                    based core with pluggable storage and tokenizer
+                    backends.
                 >;
     my @random_words = map { $chr[rand @chr] } 1 .. 30;
 
@@ -64,9 +64,9 @@ subtest make_output => sub {
     my @random_chars = map { $chr[rand @chr] } 1 .. 30;
     my @wrd = qw<
                     Hailo is a fast and lightweight markov engine
-                    intended to replace AI::MegaHAL. It has a Mouse
-                    (or Moose) based core with pluggable storage and
-                    tokenizer backends.
+                    intended to replace AI::MegaHAL. It has a Moo
+                    based core with pluggable storage and tokenizer
+                    backends.
                 >;
     my @random_words = map { $chr[rand @chr] } 1 .. 30;
 

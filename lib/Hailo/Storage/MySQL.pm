@@ -4,7 +4,7 @@ use 5.010;
 use Moo;
 use MooX::StrictConstructor;
 use List::MoreUtils qw< all >;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 extends 'Hailo::Storage';
 with qw(Hailo::Role::Arguments Hailo::Role::Storage);

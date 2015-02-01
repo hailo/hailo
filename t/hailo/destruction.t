@@ -7,7 +7,7 @@ use Test::More tests => 3;
 
 {
     package Fernando;
-    use Any::Moose;
+    use Moo;
 
     extends 'Hailo';
 

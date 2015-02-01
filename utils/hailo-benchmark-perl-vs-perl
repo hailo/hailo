@@ -19,7 +19,7 @@ cmpthese($tests, {
         my $_ = $_;
         $_ => sub {
             state $test = 1;
-            my $cmd = qq[ANY_MOOSE=Mouse prove -e '$_' $tests{$_}[0] -r $testfiles];
+            my $cmd = qq[prove -e '$_' $tests{$_}[0] -r $testfiles];
             say STDERR "Testing $_ $test/$tests (command: <<$cmd>>)";
             system $cmd;
             $test++;

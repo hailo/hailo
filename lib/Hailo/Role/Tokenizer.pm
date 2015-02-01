@@ -3,7 +3,7 @@ package Hailo::Role::Tokenizer;
 use 5.010;
 use Moo::Role;
 use Types::Standard qw(HashRef Int);
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 has spacing => (
     isa     => HashRef[Int],

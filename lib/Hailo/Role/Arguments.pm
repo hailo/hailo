@@ -3,7 +3,7 @@ package Hailo::Role::Arguments;
 use 5.010;
 use Moo::Role;
 use Types::Standard qw(HashRef Str);
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 has arguments => (
     isa           => HashRef[Str],
@@ -14,7 +14,7 @@ has arguments => (
 around arguments => sub {
     my ($orig, $self, @args) = @_;
     my $return = $self->$orig(@args);
-    return wantarray ? @{$return} : $return;
+    return wantarray ? %{$return} : $return;
 };
 
 1;

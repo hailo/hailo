@@ -1,7 +1,7 @@
 package Hailo::Test::Tokenizer;
 use 5.010;
 use Moo;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 use Hailo::Tokenizer::Words;
 
 with 'Hailo::Role::Tokenizer';

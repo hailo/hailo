@@ -3,7 +3,7 @@ package Hailo::Role::Storage;
 use 5.010;
 use Moo::Role;
 use Types::Standard qw(HashRef Int Str);
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 has brain => (
     isa => Str,

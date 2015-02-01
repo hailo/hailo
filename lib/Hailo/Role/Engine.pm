@@ -1,8 +1,9 @@
 package Hailo::Role::Engine;
 
 use 5.010;
-use Any::Moose '::Role';
-use namespace::clean -except => 'meta';
+use Moo::Role;
+use Types::Standard qw(Int);
+use namespace::clean -except => 'new';
 
 has storage => (
     required      => 1,

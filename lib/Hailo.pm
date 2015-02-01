@@ -9,7 +9,7 @@ use File::Glob ':glob';
 use Class::Load qw(try_load_class);
 use Scalar::Util qw(blessed);
 use List::Util qw(first);
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 use constant PLUGINS => [ qw[
     Hailo::Engine::Default
@@ -357,7 +357,7 @@ command-line invocation.
 
     # Hailo requires Perl 5.10
     use 5.010;
-    use Any::Moose;
+    use Moo;
     use Hailo;
 
     # Construct a new in-memory Hailo using the SQLite backend. See
@@ -383,8 +383,7 @@ command-line invocation.
 =head1 DESCRIPTION
 
 Hailo is a fast and lightweight markov engine intended to replace
-L<AI::MegaHAL|AI::MegaHAL>. It has a L<Mouse|Mouse> (or
-L<Moose|Moose>) based core with pluggable
+L<AI::MegaHAL|AI::MegaHAL>. It has a L<Moo|Moo>) based core with pluggable
 L<storage|Hailo::Role::Storage>, L<tokenizer|Hailo::Role::Tokenizer>
 and L<engine|Hailo::Role::Engine> backends.
 

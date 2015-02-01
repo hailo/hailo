@@ -2,9 +2,6 @@
 severity = 3
 verbose  = 3
 
-# disable this until it supports namespace::clean
-#[-Perl::Critic::Policy::Moose::RequireCleanNamespace]
-
 # these policies are either too anal, demand additional dependencies,
 # or inhibit backwards-compatability
 [-RegularExpressions::RequireExtendedFormatting]
@@ -36,10 +33,10 @@ verbose  = 3
 [-Subroutines::ProtectPrivateSubs]
 
 [TestingAndDebugging::RequireUseStrict]
-equivalent_modules = Any::Moose Mouse Mouse::Role MooseX::Role::Strict
+#equivalent_modules = Any::Moose Mouse Mouse::Role MooseX::Role::Strict
 
 [TestingAndDebugging::RequireUseWarnings]
-equivalent_modules = Any::Moose Mouse Mouse::Role MooseX::Role::Strict
+#equivalent_modules = Any::Moose Mouse Mouse::Role MooseX::Role::Strict
 
 [TestingAndDebugging::ProhibitNoWarnings]
 allow = once

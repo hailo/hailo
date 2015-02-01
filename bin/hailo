@@ -6,7 +6,7 @@ use Dir::Self;
 use Moo;
 use Encode qw(decode);
 use Hailo::Command;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 # use utf8 everywhere
 $_ = decode('utf8', $_) for @ARGV;

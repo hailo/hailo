@@ -2,7 +2,7 @@ package Hailo::Role::UI;
 
 use 5.010;
 use Moo::Role;
-use namespace::clean -except => 'meta';
+use namespace::clean -except => 'new';
 
 requires 'run';
 
