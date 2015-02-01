@@ -1,0 +1,12 @@
+#!/usr/bin/env perl
+use 5.010;
+use strict;
+use Benchmark ':all';
+
+my $tests = $ARGV[0] // 5;
+
+cmpthese($tests, {
+    Moo => sub {
+        system qq< prove -Ilib -r t >;
+    }
+});
