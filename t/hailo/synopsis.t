@@ -1,16 +1,15 @@
 use v5.28.0;
 use strict;
 use warnings;
-use Test::Synopsis;
+use Pod::Section qw(select_podsection);
 use Test::More tests => 1;
 
-# TODO: Don't abuse the private API?
-my ($synopsis) = Test::Synopsis::_extract_synopsis('lib/Hailo.pm');
+my ($synopsis) = select_podsection('lib/Hailo.pm' , 'SYNOPSIS');
 $synopsis =~ s/^.*?(?=\s+use)//s;
 
 local $@;
-eval <<'SYNOPSIS';
-open my $filehandle, '<', __FILE__;
+eval <<SYNOPSIS;
+open my \$filehandle, '<', __FILE__;
 chdir 't/lib/Hailo/Test';
 $synopsis
 SYNOPSIS
