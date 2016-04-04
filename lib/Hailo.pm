@@ -370,7 +370,7 @@ command-line invocation.
     # Heavy-duty training interface. Backends may drop some safety
     # features like journals or synchronous IO to train faster using
     # this mode.
-    $hailo->train("megahal.trn");
+    $hailo->train("badger.trn");
     $hailo->train($filehandle);
 
     # Make the brain babble
