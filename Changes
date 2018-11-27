@@ -2,6 +2,8 @@ Revision history for Hailo
 
 {{$NEXT}}
 
+    - Fix missing test dependency on Pod::Section.
+
 0.73 2018-11-27 13:53:39
 
    - Fully use Moose instead of now deprecated Any::Moose.
