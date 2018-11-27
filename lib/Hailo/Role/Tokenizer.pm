@@ -1,7 +1,7 @@
 package Hailo::Role::Tokenizer;
 
-use 5.010;
-use Any::Moose '::Role';
+use v5.28.0;
+use Moose::Role;
 use namespace::clean -except => 'meta';
 
 has spacing => (

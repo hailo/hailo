@@ -1,7 +1,7 @@
 package Hailo::Engine::Scored;
 
-use 5.010;
-use Any::Moose;
+use v5.28.0;
+use Moose;
 use List::Util qw<sum>;
 use List::MoreUtils qw<any>;
 use Time::HiRes qw<gettimeofday tv_interval>;

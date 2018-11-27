@@ -35,11 +35,5 @@ verbose  = 3
 [-TestingAndDebugging::ProhibitNoStrict]
 [-Subroutines::ProtectPrivateSubs]
 
-[TestingAndDebugging::RequireUseStrict]
-equivalent_modules = Any::Moose Mouse Mouse::Role MooseX::Role::Strict
-
-[TestingAndDebugging::RequireUseWarnings]
-equivalent_modules = Any::Moose Mouse Mouse::Role MooseX::Role::Strict
-
 [TestingAndDebugging::ProhibitNoWarnings]
 allow = once

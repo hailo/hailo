@@ -1,8 +1,8 @@
 package Hailo::UI::ReadLine;
 
-use 5.010;
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use v5.28.0;
+use Moose;
+use MooseX::StrictConstructor;
 use Encode 'decode';
 use Hailo;
 use Term::ReadLine;

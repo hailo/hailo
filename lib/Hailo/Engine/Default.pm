@@ -1,7 +1,7 @@
 package Hailo::Engine::Default;
 
-use 5.010;
-use Any::Moose;
+use v5.28.0;
+use Moose;
 use List::Util qw<min first shuffle>;
 use List::MoreUtils qw<uniq>;
 

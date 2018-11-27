@@ -1,7 +1,7 @@
 package Hailo::Test;
-use 5.010;
+use v5.28.0;
 use autodie;
-use Any::Moose;
+use Moose;
 use Class::Load qw(try_load_class);
 use Hailo;
 use Test::More;

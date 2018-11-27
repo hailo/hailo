@@ -1,9 +1,9 @@
 package Hailo;
 
-use 5.010;
+use v5.28.0;
 use autodie qw(open close);
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor';
+use Moose;
+use MooseX::StrictConstructor;
 use File::Glob ':glob';
 use Class::Load qw(try_load_class);
 use Scalar::Util qw(blessed);
@@ -354,8 +354,8 @@ This is the synopsis for using Hailo as a module. See L<hailo> for
 command-line invocation.
 
     # Hailo requires Perl 5.10
-    use 5.010;
-    use Any::Moose;
+    use v5.28.0;
+    use Moose;
     use Hailo;
 
     # Construct a new in-memory Hailo using the SQLite backend. See

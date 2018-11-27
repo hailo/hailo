@@ -1,11 +1,14 @@
-use 5.010;
+use v5.28.0;
 use utf8;
 use strict;
 use warnings;
 use Test::More tests => 2;
 use Hailo::Tokenizer::Chars;
 
-binmode $_, ':encoding(utf8)' for (*STDIN, *STDOUT, *STDERR);
+my $builder = Test::More->builder;
+binmode $builder->output,         ":encoding(utf8)";
+binmode $builder->failure_output, ":encoding(utf8)";
+binmode $builder->todo_output,    ":encoding(utf8)";
 
 my $toke = Hailo::Tokenizer::Chars->new();
 

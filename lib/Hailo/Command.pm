@@ -1,14 +1,14 @@
 package Hailo::Command;
 
-use 5.010;
-use Any::Moose;
-use Any::Moose 'X::Getopt';
-use Any::Moose 'X::StrictConstructor';
+use v5.28.0;
+use Moose;
+use MooseX::Getopt;
+use MooseX::StrictConstructor;
 use namespace::clean -except => 'meta';
 
 extends 'Hailo';
 
-with any_moose('X::Getopt::Dashes');
+with 'MooseX::Getopt::Dashes';
 
 ## Our internal Getopts method that Hailo.pm doesn't care about.
 
