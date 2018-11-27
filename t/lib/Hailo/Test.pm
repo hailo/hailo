@@ -32,26 +32,26 @@ sub exhaustive_tests {
 }
 
 has brief => (
-    is => 'ro',
-    isa => Bool,
+    is      => 'ro',
+    isa     => Bool,
     default => 0,
 );
 
 has in_memory => (
-    is => 'ro',
-    isa => Bool,
+    is      => 'ro',
+    isa     => Bool,
     default => 1,
 );
 
 has exhaustive => (
-    is => 'ro',
-    isa => Bool,
+    is      => 'ro',
+    isa     => Bool,
     default => 0,
 );
 
 has tmpdir => (
-    is => 'ro',
-    isa => Str,
+    is         => 'ro',
+    isa        => Str,
     lazy_build => 1,
 );
 
@@ -68,12 +68,12 @@ sub _build_tmpdir {
 }
 
 has brain => (
-    is => 'ro',
+    is  => 'ro',
     isa => Str,
 );
 
 has tmpfile => (
-    is => 'ro',
+    is         => 'ro',
     lazy_build => 1,
 );
 
@@ -90,8 +90,8 @@ sub _build_tmpfile {
 }
 
 has hailo => (
-    is => 'ro',
-    isa => "Hailo",
+    is         => 'ro',
+    isa        => 'Hailo',
     lazy_build => 1,
 );
 
