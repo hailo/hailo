@@ -3,6 +3,7 @@ Revision history for Hailo
 {{$NEXT}}
 
     - Fix missing test dependency on Pod::Section.
+    - Use MooseX::Types::Moose internally.
 
 0.73 2018-11-27 13:53:39
 

@@ -2,6 +2,7 @@ package Hailo::Role::Engine;
 
 use v5.28.0;
 use Moose::Role;
+use MooseX::Types::Moose ':all';
 use namespace::clean -except => 'meta';
 
 has storage => (
@@ -12,7 +13,7 @@ has storage => (
 
 has order => (
     required      => 1,
-    isa           => 'Int',
+    isa           => Int,
     is            => 'rw',
     documentation => "Our copy of the current markov order",
 );

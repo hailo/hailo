@@ -2,6 +2,7 @@ package Hailo::Test;
 use v5.28.0;
 use autodie;
 use Moose;
+use MooseX::Types::Moose ':all';
 use Class::Load qw(try_load_class);
 use Hailo;
 use Test::More;
@@ -32,25 +33,25 @@ sub exhaustive_tests {
 
 has brief => (
     is => 'ro',
-    isa => 'Bool',
+    isa => Bool,
     default => 0,
 );
 
 has in_memory => (
     is => 'ro',
-    isa => 'Bool',
+    isa => Bool,
     default => 1,
 );
 
 has exhaustive => (
     is => 'ro',
-    isa => 'Bool',
+    isa => Bool,
     default => 0,
 );
 
 has tmpdir => (
     is => 'ro',
-    isa => 'Str',
+    isa => Str,
     lazy_build => 1,
 );
 
@@ -68,7 +69,7 @@ sub _build_tmpdir {
 
 has brain => (
     is => 'ro',
-    isa => 'Str',
+    isa => Str,
 );
 
 has tmpfile => (
@@ -221,7 +222,7 @@ sub _connect_opts {
 
 has storage => (
     is => 'ro',
-    isa => 'Str',
+    isa => Str,
 );
 
 sub train_file {

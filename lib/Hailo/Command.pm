@@ -2,6 +2,7 @@ package Hailo::Command;
 
 use v5.28.0;
 use Moose;
+use MooseX::Types::Moose ':all';
 use MooseX::Getopt;
 use MooseX::StrictConstructor;
 use namespace::clean -except => 'meta';
@@ -16,7 +17,7 @@ has help_flag => (
     traits        => [ qw/ Getopt / ],
     cmd_aliases   => 'h',
     cmd_flag      => 'help',
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'ro',
     default       => 0,
     documentation => "You're soaking it in",
@@ -27,7 +28,7 @@ has _go_version => (
     cmd_aliases   => 'v',
     cmd_flag      => 'version',
     documentation => 'Print version and exit',
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'ro',
 );
 
@@ -35,7 +36,7 @@ has _go_examples => (
     traits        => [ qw/ Getopt / ],
     cmd_flag      => 'examples',
     documentation => 'Print examples along with the help message',
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'ro',
 );
 
@@ -44,7 +45,7 @@ has _go_progress => (
     cmd_aliases   => 'p',
     cmd_flag      => 'progress',
     documentation => 'Display progress during the import',
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'ro',
     default       => sub {
         my ($self) = @_;
@@ -57,7 +58,7 @@ has _go_learn => (
     cmd_aliases   => "l",
     cmd_flag      => "learn",
     documentation => "Learn from STRING",
-    isa           => 'Str',
+    isa           => Str,
     is            => "ro",
 );
 
@@ -66,7 +67,7 @@ has _go_learn_reply => (
     cmd_aliases   => "L",
     cmd_flag      => "learn-reply",
     documentation => "Learn from STRING and reply to it",
-    isa           => 'Str',
+    isa           => Str,
     is            => "ro",
 );
 
@@ -75,7 +76,7 @@ has _go_train => (
     cmd_aliases   => "t",
     cmd_flag      => "train",
     documentation => "Learn from all the lines in FILE, use - for STDIN",
-    isa           => 'Str',
+    isa           => Str,
     is            => "ro",
 );
 
@@ -84,7 +85,7 @@ has _go_train_fast => (
     cmd_aliases   => "f",
     cmd_flag      => "train-fast",
     documentation => "Train with aggressive caching (memory-hungry!)",
-    isa           => 'Str',
+    isa           => Str,
     is            => "ro",
 );
 
@@ -93,7 +94,7 @@ has _go_reply => (
     cmd_aliases   => "r",
     cmd_flag      => "reply",
     documentation => "Reply to STRING",
-    isa           => 'Str',
+    isa           => Str,
     is            => "ro",
 );
 
@@ -102,7 +103,7 @@ has _go_random_reply => (
     cmd_aliases   => "R",
     cmd_flag      => "random-reply",
     documentation => "Like --reply but takes no STRING; Babble at random",
-    isa           => 'Bool',
+    isa           => Bool,
     is            => "ro",
 );
 
@@ -111,7 +112,7 @@ has _go_stats => (
     cmd_aliases   => "s",
     cmd_flag      => "stats",
     documentation => "Print statistics about the brain",
-    isa           => 'Bool',
+    isa           => Bool,
     is            => "ro",
 );
 
@@ -122,7 +123,7 @@ has _go_autosave => (
     cmd_aliases   => 'a',
     cmd_flag      => 'autosave',
     documentation => 'Save the brain on exit (on by default)',
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'rw',
     trigger       => sub {
         my ($self, $bool) = @_;
@@ -135,7 +136,7 @@ has _go_order => (
     cmd_aliases   => "o",
     cmd_flag      => "order",
     documentation => "Markov order; How deep the rabbit hole goes",
-    isa           => 'Int',
+    isa           => Int,
     is            => "rw",
     trigger       => sub {
         my ($self, $order) = @_;
@@ -148,7 +149,7 @@ has _go_brain => (
     cmd_aliases   => "b",
     cmd_flag      => "brain",
     documentation => "Load/save brain to/from FILE",
-    isa           => 'Str',
+    isa           => Str,
     is            => "ro",
     trigger       => sub {
         my ($self, $brain) = @_;
@@ -161,7 +162,7 @@ has _go_engine_class => (
     traits        => [ qw/ Getopt / ],
     cmd_aliases   => "E",
     cmd_flag      => "engine",
-    isa           => 'Str',
+    isa           => Str,
     is            => "rw",
     documentation => "Use engine CLASS",
     trigger       => sub {
@@ -174,7 +175,7 @@ has _go_storage_class => (
     traits        => [ qw/ Getopt / ],
     cmd_aliases   => "S",
     cmd_flag      => "storage",
-    isa           => 'Str',
+    isa           => Str,
     is            => "rw",
     documentation => "Use storage CLASS",
     trigger       => sub {
@@ -187,7 +188,7 @@ has _go_tokenizer_class => (
     traits        => [ qw/ Getopt / ],
     cmd_aliases   => "T",
     cmd_flag      => "tokenizer",
-    isa           => 'Str',
+    isa           => Str,
     is            => "rw",
     documentation => "Use tokenizer CLASS",
     trigger       => sub {
@@ -200,7 +201,7 @@ has _go_ui_class => (
     traits        => [ qw/ Getopt / ],
     cmd_aliases   => "u",
     cmd_flag      => "ui",
-    isa           => 'Str',
+    isa           => Str,
     is            => "rw",
     documentation => "Use UI CLASS",
     trigger       => sub {

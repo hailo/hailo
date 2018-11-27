@@ -4,6 +4,7 @@ use v5.28.0;
 use autodie qw(open close);
 use Moose;
 use MooseX::StrictConstructor;
+use MooseX::Types::Moose ':all';
 use File::Glob ':glob';
 use Class::Load qw(try_load_class);
 use Scalar::Util qw(blessed);
@@ -22,12 +23,12 @@ use constant PLUGINS => [ qw[
 ] ];
 
 has brain => (
-    isa => 'Str',
+    isa => Str,
     is  => 'rw',
 );
 
 has order => (
-    isa     => 'Int',
+    isa     => Int,
     is      => 'rw',
     default => 2,
     trigger => sub {
@@ -37,7 +38,7 @@ has order => (
 );
 
 has _custom_order => (
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'rw',
     default       => 0,
     init_arg      => undef,
@@ -45,7 +46,7 @@ has _custom_order => (
 );
 
 has _custom_tokenizer_class => (
-    isa           => 'Bool',
+    isa           => Bool,
     is            => 'rw',
     default       => 0,
     init_arg      => undef,
@@ -53,14 +54,14 @@ has _custom_tokenizer_class => (
 );
 
 has save_on_exit => (
-    isa     => 'Bool',
+    isa     => Bool,
     is      => 'rw',
     default => 1,
 );
 
 has brain_resource => (
     documentation => "Alias for `brain' for backwards compatibility",
-    isa           => 'Str',
+    isa           => Str,
     is            => 'rw',
     trigger       => sub {
         my ($self, $brain) = @_;
@@ -103,7 +104,7 @@ for my $k (keys %has) {
 
     # working classes
     has "${k}_class" => (
-        isa           => 'Str',
+        isa           => Str,
         is            => "rw",
         default       => $default,
         ($k eq 'tokenizer'
@@ -117,7 +118,7 @@ for my $k (keys %has) {
     # Object arguments
     has "${k}_args" => (
         documentation => "Arguments for the $name class",
-        isa           => 'HashRef',
+        isa           => HashRef,
         is            => "ro",
         default       => sub { +{} },
     );
