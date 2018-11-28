@@ -15,6 +15,8 @@ LINE: while (defined($_ = readline ARGV)) {
 
     s/^\s+is\s+=> 'ro', # for lazy_build\n//g;
     s/^(\s+)lazy_build(\s+)=> 1,\n/${1}is        $2=> 'lazy',\n${1}predicate $2=> 1,\n${1}clearer   $2=> 1,\n/g;
+
+    s/isa\s+=>\K '(DBI::db|Hailo)'/ InstanceOf['$1']/g;
 }
 continue {
     die "-p destination: $!\n" unless print $_;
