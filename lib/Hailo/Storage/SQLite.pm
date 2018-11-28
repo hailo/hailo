@@ -10,9 +10,11 @@ with qw(Hailo::Role::Arguments Hailo::Role::Storage);
 
 sub _build_dbd { return 'SQLite' };
 
-override _build_dbd_options => sub {
+around _build_dbd_options => sub {
+    my ($orig, $self) = (shift, shift);
+
     return {
-        %{ super() },
+        %{ $self->$orig(@_) },
         sqlite_unicode => 1,
     };
 };
@@ -72,13 +74,14 @@ after stop_training => sub {
     return;
 };
 
-override initialized => sub {
-    my ($self) = @_;
+around initialized => sub {
+    my $orig = shift;
+    my $self = shift;
 
     my $brain = $self->brain;
     return unless defined $brain;
     return if $brain eq ':memory:';
-    return -e $brain && super();
+    return -e $brain && $self->$orig(@_);
 };
 
 sub ready {

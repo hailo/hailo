@@ -298,13 +298,14 @@ sub run {
     return;
 }
 
-override _train_fh => sub {
-    my ($self, $fh, $fast, $filename) = @_;
+around _train_fh => sub {
+    my ($orig, $self) = (shift, shift);
+    my ($fh, $fast, $filename) = @_;
 
     if ($self->_go_progress and $self->_is_interactive) {
         $self->train_progress($fh, $fast, $filename);
     } else {
-        super();
+        $self->$orig(@_);
     }
 };
 

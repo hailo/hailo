@@ -10,9 +10,11 @@ with qw(Hailo::Role::Arguments Hailo::Role::Storage);
 
 sub _build_dbd { return 'Pg' };
 
-override _build_dbd_options => sub {
+around _build_dbd_options => sub {
+    my ($orig, $self) = (shift, shift);
+
     return {
-        %{ super() },
+        %{ $self->$orig(@_) },
         pg_enable_utf8 => 1,
     };
 };

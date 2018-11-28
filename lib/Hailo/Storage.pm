@@ -284,9 +284,11 @@ passed to L<DBI|DBI>.
 
 Subclasses can override this method to add options of their own. E.g:
 
-    override _build_dbd_options => sub {
+    around _build_dbd_options => sub {
+        my ($orig, $self) = (shift, shift);
+
         return {
-            %{ super() },
+            %{ $self->$orig(@_) },
             sqlite_unicode => 1,
         };
     };
