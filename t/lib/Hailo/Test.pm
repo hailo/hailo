@@ -50,7 +50,7 @@ has exhaustive => (
 );
 
 has tmpdir => (
-    is         => 'ro',
+    is         => 'ro', # for lazy_build
     isa        => Str,
     lazy_build => 1,
 );
@@ -73,7 +73,7 @@ has brain => (
 );
 
 has tmpfile => (
-    is         => 'ro',
+    is         => 'ro', # for lazy_build
     lazy_build => 1,
 );
 
@@ -90,7 +90,7 @@ sub _build_tmpfile {
 }
 
 has hailo => (
-    is         => 'ro',
+    is         => 'ro', # for lazy_build
     isa        => 'Hailo',
     lazy_build => 1,
 );

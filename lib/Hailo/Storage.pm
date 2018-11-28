@@ -9,14 +9,14 @@ use Hailo::Storage::Schema;
 
 has dbd => (
     isa           => Str,
-    is            => 'ro',
+    is            => 'ro', # for lazy_build
     lazy_build    => 1,
     documentation => "The DBD::* driver we're using",
 );
 
 has dbd_options => (
     isa           => HashRef,
-    is            => 'ro',
+    is            => 'ro', # for lazy_build
     lazy_build    => 1,
     documentation => 'Options passed as the last argument to DBI->connect()',
 );
@@ -44,7 +44,7 @@ sub _build_dbh {
 
 has dbi_options => (
     isa           => ArrayRef,
-    is            => 'ro',
+    is            => 'ro', # for lazy_build
     lazy_build    => 1,
     documentation => 'Options passed to DBI->connect()',
 );
@@ -74,7 +74,7 @@ has _engaged => (
 
 has sth => (
     isa        => HashRef,
-    is         => 'ro',
+    is         => 'ro', # for lazy_build
     lazy_build => 1,
     documentation => 'A HashRef of prepared DBI statement handles',
 );

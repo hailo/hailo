@@ -127,7 +127,7 @@ for my $k (keys %has) {
     has "_${k}" => (
         does        => "Hailo::Role::$name",
         lazy_build  => 1,
-        is          => 'ro',
+        is          => 'ro', # for lazy_build
         init_arg    => undef,
     );
 
