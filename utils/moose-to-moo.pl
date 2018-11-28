@@ -8,6 +8,7 @@ BEGIN { $^I = ""; }
 LINE: while (defined($_ = readline ARGV)) {
     s/use Moose;/use Moo;/g;
     s/use Moose::Role;/use Moo::Role;/g;
+    s/use MooseX::Getopt;/use MooX::Options;/g;
     s/use MooseX::Types::Moose ':all';/use Types::Standard ':all';/g;
     s/use MooseX::StrictConstructor;/use MooX::StrictConstructor;/g;
     s/__PACKAGE__->meta->make_immutable;/1;/g;
