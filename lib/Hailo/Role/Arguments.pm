@@ -9,7 +9,6 @@ has arguments => (
     isa           => HashRef[Str],
     is            => 'ro',
     documentation => "Arguments passed from Hailo",
-    auto_deref    => 1,
 );
 
 1;

@@ -24,7 +24,7 @@ sub _build_dbi_options {
     my ($self) = @_;
     my $dbd = $self->dbd;
     my $dbd_options = $self->dbd_options;
-    my $args = $self->arguments;
+    my $args = %{$self->arguments};
 
     my $conn_line = "dbi:$dbd";
     $conn_line .= ":database=$args->{database}"  if exists $args->{database};

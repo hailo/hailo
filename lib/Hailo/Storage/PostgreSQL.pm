@@ -23,18 +23,18 @@ sub _build_dbi_options {
     my ($self) = @_;
     my $dbd = $self->dbd;
     my $dbd_options = $self->dbd_options;
-    my $args = $self->arguments;
+    my %args = %{$self->arguments};
 
     my $conn_line = "dbi:$dbd";
-    $conn_line .= ":dbname=$args->{dbname}"  if exists $args->{dbname};
-    $conn_line .= ";host=$args->{host}"    if exists $args->{host};
-    $conn_line .= ";port=$args->{port}"    if exists $args->{port};
-    $conn_line .= ";options=$args->{options}" if exists $args->{options};
+    $conn_line .= ":dbname=$args{dbname}"  if exists $args{dbname};
+    $conn_line .= ";host=$args{host}"    if exists $args{host};
+    $conn_line .= ";port=$args{port}"    if exists $args{port};
+    $conn_line .= ";options=$args{options}" if exists $args{options};
 
     my @options = (
         $conn_line,
-        ($args->{username} || ''),
-        ($args->{password} || ''),
+        ($args{username} || ''),
+        ($args{password} || ''),
         $dbd_options,
     );
 

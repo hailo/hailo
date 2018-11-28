@@ -10,7 +10,7 @@ extends 'Hailo::Engine::Default';
 
 after BUILD => sub {
     my ($self) = @_;
-    my %args = $self->arguments;
+    my %args = %{$self->arguments};
 
     if (defined $args{iterations} && defined $args{interval}) {
         die __PACKAGE__.": You can only specify one of 'iterations' and 'interval'\n";
@@ -40,7 +40,7 @@ sub reply {
     my $iterations = 0;
 
     my $done;
-    my %args = $self->arguments;
+    my %args = %{$self->arguments};
     if (!defined $args{iterations} && !defined $args{interval}) {
         # construct replies for half a second by default
         $args{interval} = 0.5;

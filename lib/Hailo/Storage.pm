@@ -37,15 +37,14 @@ has dbh => (
 
 sub _build_dbh {
     my ($self) = @_;
-    my $dbd_options = $self->dbi_options;
+    my $dbi_options = $self->dbi_options;
 
-    return DBI->connect($self->dbi_options);
+    return DBI->connect(@$dbi_options);
 };
 
 has dbi_options => (
     isa           => ArrayRef,
     is            => 'ro',
-    auto_deref    => 1,
     lazy_build    => 1,
     documentation => 'Options passed to DBI->connect()',
 );
