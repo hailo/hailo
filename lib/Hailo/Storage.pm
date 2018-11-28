@@ -1,6 +1,6 @@
 package Hailo::Storage;
 
-use v5.28.0;
+use v5.10.0;
 use Moose;
 use MooseX::StrictConstructor;
 use MooseX::Types::Moose ':all';

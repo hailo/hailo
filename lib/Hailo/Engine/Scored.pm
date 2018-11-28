@@ -1,6 +1,6 @@
 package Hailo::Engine::Scored;
 
-use v5.28.0;
+use v5.10.0;
 use Moose;
 use List::Util qw<sum>;
 use List::MoreUtils qw<any>;

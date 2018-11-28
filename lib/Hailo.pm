@@ -1,6 +1,6 @@
 package Hailo;
 
-use v5.28.0;
+use v5.10.0;
 use autodie qw(open close);
 use Moose;
 use MooseX::StrictConstructor;
@@ -355,7 +355,7 @@ This is the synopsis for using Hailo as a module. See L<hailo> for
 command-line invocation.
 
     # Hailo requires Perl 5.10
-    use v5.28.0;
+    use v5.10.0;
     use Moose;
     use Hailo;
 

@@ -7,7 +7,7 @@
 # perl -pi
 BEGIN { $^I = ""; }
 
-use v5.28.0;
+use v5.10.0;
 use Moose;
 use Class::Load 'load_class';
 use Module::CoreList;

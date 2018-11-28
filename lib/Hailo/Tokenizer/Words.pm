@@ -1,6 +1,6 @@
 package Hailo::Tokenizer::Words;
 
-use v5.28.0;
+use v5.10.0;
 use utf8;
 use Moose;
 use MooseX::StrictConstructor;

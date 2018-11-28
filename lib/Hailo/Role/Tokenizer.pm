@@ -1,6 +1,6 @@
 package Hailo::Role::Tokenizer;
 
-use v5.28.0;
+use v5.10.0;
 use Moose::Role;
 use MooseX::Types::Moose ':all';
 use namespace::clean -except => 'meta';
