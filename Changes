@@ -2,6 +2,8 @@ Revision history for Hailo
 
 {{$NEXT}}
 
+0.75 2018-11-28 12:08:58
+
     - In 0.73 we very aggressively put "use v5.28.0" without any
       need. My bad. It's now "v5.10.0" again. Also in a fit of "let's
       just use the latest" all the dependencies were pinned to
